@@ -4,11 +4,13 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 authRouter.post('/login', async (req, res) => {
   const { email, password } = req.body;
+  console.log('req.body', email);
   if (!email || !password)
     return res
       .status(400)
       .json({ message: 'Username and password are required.' });
   const foundUser = await User.findOne({ email }); // removed .exec();
+  console.log('foundUser: ', foundUser);
   const match = await bcrypt.compare(password, foundUser.passwordHash);
   if (match) {
     const newRefreshToken = jwt.sign(
