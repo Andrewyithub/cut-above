@@ -4,33 +4,41 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 authRouter.post('/login', async (req, res) => {
   const { email, password } = req.body;
-  console.log('req.body', email);
+
   if (!email || !password)
     return res
       .status(400)
-      .json({ message: 'Username and password are required.' });
+      .json({ message: 'Email and password are required.' });
   const foundUser = await User.findOne({ email }); // removed .exec();
-  console.log('foundUser: ', foundUser);
   const match = await bcrypt.compare(password, foundUser.passwordHash);
-  if (match) {
-    const newRefreshToken = jwt.sign(
-      {
-        id: foundUser._id,
-      },
-      process.env.REFRESH_TOKEN_SECRET,
-      { expiresIn: '10m' }
-    );
-    // Creates Secure Cookie with refresh token
-    res.cookie('jwt', newRefreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'None',
-      maxAge: 24 * 60 * 60 * 1000,
-    });
-    res.json({ success: true, message: 'Successfully logged in' });
-  } else {
-    res.sendStatus(401);
-  }
+  if (!match) return res.status(401).json({ message: ' Unauthorized' });
+  const accessToken = jwt.sign(
+    {
+      id: foundUser._id,
+    },
+    process.env.ACCESS_TOKEN_SECRET,
+    { expiresIn: '1m' }
+  );
+  const newRefreshToken = jwt.sign(
+    {
+      id: foundUser._id,
+    },
+    process.env.REFRESH_TOKEN_SECRET,
+    { expiresIn: '5m' }
+  );
+  // Creates Secure Cookie with refresh token
+  res.cookie('jwt', newRefreshToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'None',
+    maxAge: 5 * 60 * 1000, // 5 minutes
+  });
+  res.status(200).json({
+    success: true,
+    message: 'Successfully logged in',
+    user: foundUser.email,
+    token: accessToken,
+  });
 });
 
 module.exports = authRouter;
