@@ -9,6 +9,7 @@ const logger = require('./utils/logger');
 const corsOptions = require('./config/corsOptions');
 
 const authRouter = require('./controllers/auth');
+const logoutRouter = require('./controllers/logout');
 const registerRouter = require('./controllers/register');
 
 logger.info('connecting to', process.env.MONGODB_URI);
@@ -25,7 +26,8 @@ mongoose
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
-app.use('/signup', registerRouter);
 app.use('/auth', authRouter);
+app.use('/logout', logoutRouter);
+app.use('/signup', registerRouter);
 
 module.exports = app;
