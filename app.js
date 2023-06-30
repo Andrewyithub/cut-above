@@ -5,12 +5,13 @@ const app = express();
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const mongoose = require('mongoose');
-const logger = require('./utils/logger');
 const corsOptions = require('./config/corsOptions');
-
+const logger = require('./utils/logger');
+const middleware = require('./utils/middleware');
 const authRouter = require('./controllers/auth');
 const logoutRouter = require('./controllers/logout');
 const registerRouter = require('./controllers/register');
+const appointmentRouter = require('./controllers/appointment');
 
 logger.info('connecting to', process.env.MONGODB_URI);
 mongoose.set('strictQuery', false);
@@ -29,5 +30,7 @@ app.use(cookieParser());
 app.use('/auth', authRouter);
 app.use('/logout', logoutRouter);
 app.use('/signup', registerRouter);
+app.use(middleware.verifyJWT);
+app.use('/appointment', appointmentRouter);
 
 module.exports = app;

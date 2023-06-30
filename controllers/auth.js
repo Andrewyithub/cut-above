@@ -11,27 +11,27 @@ authRouter.post('/login', async (req, res) => {
       .json({ message: 'Email and password are required.' });
   const foundUser = await User.findOne({ email }); // removed .exec();
   const match = await bcrypt.compare(password, foundUser.passwordHash);
-  if (!match) return res.status(401).json({ message: ' Unauthorized' });
+  if (!match) return res.status(401).json({ message: 'Unauthorized' });
   const accessToken = jwt.sign(
     {
       id: foundUser._id,
     },
     process.env.ACCESS_TOKEN_SECRET,
-    { expiresIn: '1m' }
+    { expiresIn: '5s' }
   );
   const newRefreshToken = jwt.sign(
     {
       id: foundUser._id,
     },
     process.env.REFRESH_TOKEN_SECRET,
-    { expiresIn: '5m' }
+    { expiresIn: '15s' }
   );
   // Creates Secure Cookie with refresh token
   res.cookie('jwt', newRefreshToken, {
     httpOnly: true,
     secure: true,
     sameSite: 'None',
-    maxAge: 5 * 60 * 1000, // 5 minutes
+    maxAge: 15 * 1000, // 15 seconds
   });
   res.status(200).json({
     success: true,
