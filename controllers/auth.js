@@ -31,7 +31,7 @@ authRouter.post('/login', async (req, res) => {
     { expiresIn: '15m' }
   );
 
-  let newRefreshTokenArray;
+  let newRefreshTokenArray = [];
   if (cookies?.jwt) {
     /* 
     Scenario added here: 
