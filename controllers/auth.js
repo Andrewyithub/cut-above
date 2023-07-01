@@ -46,7 +46,6 @@ authRouter.post('/login', async (req, res) => {
       // clear out ALL previous refresh tokens
       newRefreshTokenArray = [];
     }
-    console.log('suspected refresh token reuse. deleting cookies.');
     res.clearCookie('jwt', { httpOnly: true, sameSite: 'None', secure: true });
   }
 
