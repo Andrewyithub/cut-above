@@ -31,7 +31,11 @@ authRouter.post('/login', async (req, res) => {
     { expiresIn: '15m' }
   );
 
-  let newRefreshTokenArray = [];
+
+  let newRefreshTokenArray = !cookies?.jwt
+    ? foundUser.refreshToken
+    : foundUser.refreshToken.filter((rt) => rt !== cookies.jwt);
+
   if (cookies?.jwt) {
     /* 
     Scenario added here: 
@@ -46,11 +50,13 @@ authRouter.post('/login', async (req, res) => {
       // clear out ALL previous refresh tokens
       newRefreshTokenArray = [];
     }
+
+    // clear out current session cookie
     res.clearCookie('jwt', { httpOnly: true, sameSite: 'None', secure: true });
   }
 
   foundUser.refreshToken = [...newRefreshTokenArray, newRefreshToken];
-  const result = await foundUser.save();
+  await foundUser.save();
 
   // Creates Secure Cookie with refresh token
   res.cookie('jwt', newRefreshToken, {
