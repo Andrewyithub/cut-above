@@ -7,7 +7,7 @@ registerRouter.post('/', async (request, response) => {
   const { email, password } = request.body;
   const existingUser = await User.findOne({ email });
   if (existingUser) {
-    return response.status(400).json({ error: 'username must be unique' });
+    return response.status(400).json({ error: 'Email must be unique' });
   }
   const saltRounds = 10;
   const passwordHash = await bcrypt.hash(password, saltRounds);
