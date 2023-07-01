@@ -21,16 +21,15 @@ authRouter.post('/login', async (req, res) => {
       id: foundUser._id,
     },
     process.env.ACCESS_TOKEN_SECRET,
-    { expiresIn: '10m' }
+    { expiresIn: '5s' }
   );
   const newRefreshToken = jwt.sign(
     {
       id: foundUser._id,
     },
     process.env.REFRESH_TOKEN_SECRET,
-    { expiresIn: '15m' }
+    { expiresIn: '10m' }
   );
-
 
   let newRefreshTokenArray = !cookies?.jwt
     ? foundUser.refreshToken
@@ -63,7 +62,7 @@ authRouter.post('/login', async (req, res) => {
     httpOnly: true,
     secure: true,
     sameSite: 'None',
-    maxAge: 15 * 60 * 1000, // 15 minutes
+    maxAge: 10 * 60 * 1000, // 10 minutes
   });
 
   res.status(200).json({
