@@ -54,13 +54,13 @@ refreshTokenRouter.get('/', async (req, res) => {
           id: foundUser._id,
         },
         process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: '5s' }
+        { expiresIn: '15m' }
       );
 
       const newRefreshToken = jwt.sign(
         { id: foundUser._id },
         process.env.REFRESH_TOKEN_SECRET,
-        { expiresIn: '10m' }
+        { expiresIn: '1h' }
       );
       // Saving refreshToken with current user
       foundUser.refreshToken = [...newRefreshTokenArray, newRefreshToken];
@@ -71,7 +71,7 @@ refreshTokenRouter.get('/', async (req, res) => {
         httpOnly: true,
         secure: true,
         sameSite: 'None',
-        maxAge: 10 * 60 * 1000, // 10 minutes
+        maxAge: 1 * 60 * 60 * 1000, // 1 hour
       });
 
       res.json({ token: accessToken });
