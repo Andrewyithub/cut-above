@@ -4,7 +4,7 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 
 registerRouter.post('/', async (request, response) => {
-  const { email, password } = request.body;
+  const { firstName, lastName, email, password } = request.body;
   const existingUser = await User.findOne({ email });
   if (existingUser) {
     return response.status(400).json({ error: 'Email must be unique' });
@@ -13,6 +13,8 @@ registerRouter.post('/', async (request, response) => {
   const passwordHash = await bcrypt.hash(password, saltRounds);
 
   const newUser = new User({
+    firstName,
+    lastName,
     email,
     passwordHash,
   });
