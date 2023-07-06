@@ -8,25 +8,8 @@ scheduleRouter.get('/', async (req, res) => {
 });
 
 scheduleRouter.post('/', async (req, res) => {
-  // const schedules = req.body;
   const { dates, open, close } = req.body;
-  // console.log(date.convertToEST(schedules.end));
-  // console.log(date.convertToEST(schedules.start));
-  // console.log(date.convertToEST(schedules.open));
-  // console.log(date.convertToEST(schedules.close));
-  // const newSchedule = new Schedule({
-  //   date: date.convertToEST(schedules.start),
-  //   open: date.convertToEST(schedules.open),
-  //   close: date.convertToEST(schedules.close),
-  // });
   const dateRangeToSchedule = date.generateRange(dates, open, close);
-  console.log(dateRangeToSchedule);
-  // const newSchedule = new Schedule({
-  //   date: schedules.start,
-  //   open: schedules.open,
-  //   close: schedules.close,
-  // });
-  // await newSchedule.save();
   const newSchedules = dateRangeToSchedule
     .map((schedule) => new Schedule(schedule))
     .map((newSchedule) => newSchedule.save());

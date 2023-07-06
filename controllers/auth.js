@@ -64,7 +64,6 @@ authRouter.post('/login', async (req, res) => {
     sameSite: 'None',
     maxAge: 1 * 60 * 60 * 1000, // 1 day
   });
-  console.log('newRefreshToken on auth', newRefreshToken.slice(-9));
 
   res.status(200).json({
     success: true,
