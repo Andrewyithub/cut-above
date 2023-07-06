@@ -3,14 +3,11 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 refreshTokenRouter.get('/', async (req, res) => {
-  console.log('refreshing');
   const cookies = req.cookies;
   if (!cookies?.jwt) {
-    console.log('no refresh token');
     return res.sendStatus(401);
   }
   const refreshToken = cookies.jwt;
-  console.log('old refresh token', refreshToken.slice(-9));
   res.clearCookie('jwt', { httpOnly: true, sameSite: 'None', secure: true });
 
   const foundUser = await User.findOne({ refreshToken }).exec();
@@ -22,7 +19,6 @@ refreshTokenRouter.get('/', async (req, res) => {
       refreshToken,
       process.env.REFRESH_TOKEN_SECRET,
       async (err, decoded) => {
-        console.log('detected refresh token reuse');
         if (err) return res.sendStatus(403); //Forbidden
         // Delete refresh tokens of hacked user
         const hackedUser = await User.findOne({
@@ -32,7 +28,6 @@ refreshTokenRouter.get('/', async (req, res) => {
         await hackedUser.save();
       }
     );
-    console.log('detected refresh token reuse');
     return res.sendStatus(403); //Forbidden
   }
 
@@ -47,7 +42,6 @@ refreshTokenRouter.get('/', async (req, res) => {
     async (err, decoded) => {
       if (err) {
         // remove expired refresh token from user db
-        console.log('refresh token expired');
         foundUser.refreshToken = [...newRefreshTokenArray];
         await foundUser.save();
       }
@@ -55,7 +49,6 @@ refreshTokenRouter.get('/', async (req, res) => {
         return res.sendStatus(403);
 
       // Refresh token was still valid
-      console.log('refresh token still valid');
       const accessToken = jwt.sign(
         {
           id: foundUser._id,
@@ -80,7 +73,6 @@ refreshTokenRouter.get('/', async (req, res) => {
         sameSite: 'None',
         maxAge: 1 * 60 * 60 * 1000, // 1 day
       });
-      console.log('newRefreshToken on refresh', newRefreshToken.slice(-9));
       res.json({ token: accessToken });
     }
   );
