@@ -17,6 +17,11 @@ const convertToEST = (date) => {
   return dateObj;
 };
 
+const convertToEstTime = (dateObj, time) => {
+  const [hour, min] = time.split(':');
+  return dateObj.hour(Number(hour)).minute(Number(min));
+};
+
 const generateRange = (dates, open, close) => {
   const [start, end] = dates;
   const endDate = dayjs(end).format('YYYY-MM-DD');
@@ -41,4 +46,4 @@ const generateRange = (dates, open, close) => {
   return datesToSchedule;
 };
 
-module.exports = { convertToEST, generateRange };
+module.exports = { convertToEST, convertToEstTime, generateRange };

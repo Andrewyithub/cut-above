@@ -14,12 +14,14 @@ appointmentRouter.get('/', async (req, res) => {
 
 appointmentRouter.post('/', async (req, res) => {
   const { date, start, end, service, employee } = req.body;
+  console.log(req.body);
   const clientToBook = await User.findOne({ _id: req.user });
   const employeeToBook = await User.findOne({ _id: employee });
+  const formattedDate = dateServices.convertToEST(date);
   const newAppt = new Appointment({
-    date: dateServices.convertToEST(date),
-    start,
-    end,
+    date: formattedDate,
+    start: dateServices.convertToEstTime(formattedDate, start),
+    end: dateServices.convertToEstTime(formattedDate, end),
     service,
     client: clientToBook,
     employee: employeeToBook,
