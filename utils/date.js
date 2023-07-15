@@ -9,7 +9,13 @@ dayjs.extend(timezone);
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
 
-const convertToEST = (date) => dayjs(date).format('YYYY-MM-DD hh:mm A');
+// const convertToEST = (date) => dayjs(date).format('YYYY-MM-DD hh:mm A');
+
+const convertToEST = (date) => {
+  const formattedDate = dayjs(date).format('YYYY-MM-DD');
+  const dateObj = dayjs.tz(formattedDate, 'America/New_York');
+  return dateObj;
+};
 
 const generateRange = (dates, open, close) => {
   const [start, end] = dates;

@@ -1,6 +1,7 @@
 const appointmentRouter = require('express').Router();
 const Appointment = require('../models/Appointment');
 const User = require('../models/User');
+const dateServices = require('../utils/date');
 
 appointmentRouter.get('/', async (req, res) => {
   const appointment = [{ id: 1, date: '10/08/2023', title: 'Airport' }];
@@ -8,14 +9,11 @@ appointmentRouter.get('/', async (req, res) => {
 });
 
 appointmentRouter.post('/', async (req, res) => {
-  console.log('post req received');
-  console.log('body: ', req.body);
   const { date, start, end, service, employee } = req.body;
   const clientToBook = await User.findOne({ _id: req.user });
   const employeeToBook = await User.findOne({ _id: employee });
-  console.log('employee', employeeToBook);
   const newAppt = new Appointment({
-    date,
+    date: dateServices.convertToEST(date),
     start,
     end,
     service,
