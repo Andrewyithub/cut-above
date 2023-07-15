@@ -16,7 +16,6 @@ const registerRouter = require('./controllers/register');
 const refreshTokenRouter = require('./controllers/refreshToken');
 const scheduleRouter = require('./controllers/schedule');
 
-logger.info('connecting to', process.env.MONGODB_URI);
 mongoose.set('strictQuery', false);
 mongoose
   .connect(process.env.MONGODB_URI)
