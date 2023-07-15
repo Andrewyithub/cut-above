@@ -14,7 +14,6 @@ appointmentRouter.get('/', async (req, res) => {
 
 appointmentRouter.post('/', async (req, res) => {
   const { date, start, end, service, employee } = req.body;
-  console.log(req.body);
   const clientToBook = await User.findOne({ _id: req.user });
   const employeeToBook = await User.findOne({ _id: employee });
   const formattedDate = dateServices.convertToEST(date);
@@ -35,17 +34,12 @@ appointmentRouter.post('/', async (req, res) => {
 });
 
 appointmentRouter.delete('/:id', async (req, res) => {
-  console.log('req.body', req.body);
   const { employee, date } = await Appointment.findByIdAndDelete(req.params.id);
-  console.log('employee: ', employee);
-  console.log('date: ', date);
   const scheduleToUpdate = await Schedule.findOne({ date });
-  console.log('scheduleToUpdate', scheduleToUpdate);
   const index = scheduleToUpdate.appointments.findIndex(
     (appt) => appt._id.toString() === req.params.id
   );
   scheduleToUpdate.appointments.splice(index, 1);
-  // scheduleToUpdate.available.push(employee);
   await scheduleToUpdate.save();
 
   res.status(200).json({
