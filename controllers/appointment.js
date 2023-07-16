@@ -33,6 +33,19 @@ appointmentRouter.post('/', async (req, res) => {
   });
 });
 
+appointmentRouter.put('/:id', async (req, res) => {
+  const updatedAppointment = await Appointment.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    { new: true, runValidators: true, context: 'query' }
+  );
+  res.status(200).json({
+    success: true,
+    message: 'Appointment successfully reserved',
+    data: updatedAppointment,
+  });
+});
+
 appointmentRouter.delete('/:id', async (req, res) => {
   const { employee, date } = await Appointment.findByIdAndDelete(req.params.id);
   const scheduleToUpdate = await Schedule.findOne({ date });

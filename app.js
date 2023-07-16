@@ -38,12 +38,5 @@ app.use('/signup', registerRouter);
 app.use(middleware.verifyJWT);
 app.use('/appointment', appointmentRouter);
 app.use('/schedule', scheduleRouter);
-app.get('/*', (req, res) => {
-  const url =
-    process.env.NODE_ENV === 'development'
-      ? 'http://localhost:3000'
-      : 'https://cutaboveshop.onrender.com';
-  res.redirect(url);
-});
 
 module.exports = app;
