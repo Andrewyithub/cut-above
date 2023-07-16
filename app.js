@@ -15,6 +15,7 @@ const logoutRouter = require('./controllers/logout');
 const registerRouter = require('./controllers/register');
 const refreshTokenRouter = require('./controllers/refreshToken');
 const scheduleRouter = require('./controllers/schedule');
+const userRouter = require('./controllers/user');
 
 mongoose.set('strictQuery', false);
 mongoose
@@ -38,5 +39,6 @@ app.use('/signup', registerRouter);
 app.use(middleware.verifyJWT);
 app.use('/appointment', appointmentRouter);
 app.use('/schedule', scheduleRouter);
+app.use('/user', userRouter);
 
 module.exports = app;
