@@ -69,6 +69,7 @@ authRouter.post('/login', async (req, res) => {
     success: true,
     message: 'Successfully logged in',
     user: foundUser.email,
+    role: foundUser.role,
     token: accessToken,
   });
 });
