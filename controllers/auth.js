@@ -1,8 +1,8 @@
-const authRouter = require('express').Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-authRouter.post('/login', async (req, res) => {
+
+const handleLogin = async (req, res) => {
   const cookies = req.cookies;
 
   const { email, password } = req.body;
@@ -72,6 +72,6 @@ authRouter.post('/login', async (req, res) => {
     role: foundUser.role,
     token: accessToken,
   });
-});
+};
 
-module.exports = authRouter;
+module.exports = { handleLogin };

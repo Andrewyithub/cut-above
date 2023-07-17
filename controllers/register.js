@@ -1,9 +1,8 @@
 const bcrypt = require('bcrypt');
-const registerRouter = require('express').Router();
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 
-registerRouter.post('/', async (request, response) => {
+const handleRegister = async (request, response) => {
   const { firstName, lastName, email, password } = request.body;
   const existingUser = await User.findOne({ email });
   if (existingUser) {
@@ -24,6 +23,6 @@ registerRouter.post('/', async (request, response) => {
   response
     .status(201)
     .send({ success: true, message: 'Successfully registered account' });
-});
+};
 
-module.exports = registerRouter;
+module.exports = { handleRegister };

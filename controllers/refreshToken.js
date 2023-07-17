@@ -1,8 +1,7 @@
-const refreshTokenRouter = require('express').Router();
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-refreshTokenRouter.get('/', async (req, res) => {
+const handleRefreshToken = async (req, res) => {
   const cookies = req.cookies;
   if (!cookies?.jwt) {
     return res.sendStatus(401);
@@ -76,6 +75,6 @@ refreshTokenRouter.get('/', async (req, res) => {
       res.json({ token: accessToken });
     }
   );
-});
+};
 
-module.exports = refreshTokenRouter;
+module.exports = { handleRefreshToken };
