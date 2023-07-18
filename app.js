@@ -8,13 +8,6 @@ const mongoose = require('mongoose');
 const corsOptions = require('./config/corsOptions');
 const logger = require('./utils/logger');
 const middleware = require('./utils/middleware');
-const appointmentRouter = require('./controllers/appointment');
-const employeeRouter = require('./controllers/employee');
-const logoutRouter = require('./controllers/logout');
-const registerRouter = require('./controllers/register');
-const refreshTokenRouter = require('./controllers/refreshToken');
-const scheduleRouter = require('./controllers/schedule');
-const userRouter = require('./controllers/user');
 
 mongoose.set('strictQuery', false);
 mongoose
