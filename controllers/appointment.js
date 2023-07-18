@@ -3,16 +3,15 @@ const Appointment = require('../models/Appointment');
 const Schedule = require('../models/Schedule');
 const User = require('../models/User');
 const dateServices = require('../utils/date');
-const dayjs = require('dayjs');
 
-appointmentRouter.get('/', async (req, res) => {
+const getAllAppointments = async (req, res) => {
   const appointments = await Appointment.find({
     $or: [{ client: req.user }, { employee: req.user }],
   });
   res.status(200).json(appointments);
-});
+};
 
-appointmentRouter.post('/', async (req, res) => {
+const createNewAppointment = async (req, res) => {
   const { date, start, end, service, employee } = req.body;
   const clientToBook = await User.findOne({ _id: req.user });
   const employeeToBook = await User.findOne({ _id: employee });
@@ -31,9 +30,9 @@ appointmentRouter.post('/', async (req, res) => {
     message: 'Appointment successfully reserved',
     data: newAppt,
   });
-});
+};
 
-appointmentRouter.put('/:id', async (req, res) => {
+const updateAppointment = async (req, res) => {
   const updatedAppointment = await Appointment.findByIdAndUpdate(
     req.params.id,
     req.body,
@@ -44,10 +43,10 @@ appointmentRouter.put('/:id', async (req, res) => {
     message: 'Appointment successfully reserved',
     data: updatedAppointment,
   });
-});
+};
 
-appointmentRouter.delete('/:id', async (req, res) => {
-  const { employee, date } = await Appointment.findByIdAndDelete(req.params.id);
+const deleteAppointment = async (req, res) => {
+  const { date } = await Appointment.findByIdAndDelete(req.params.id);
   const scheduleToUpdate = await Schedule.findOne({ date });
   const index = scheduleToUpdate.appointments.findIndex(
     (appt) => appt._id.toString() === req.params.id
@@ -59,6 +58,11 @@ appointmentRouter.delete('/:id', async (req, res) => {
     success: true,
     message: 'Appointment successfully cancelled',
   });
-});
+};
 
-module.exports = appointmentRouter;
+module.exports = {
+  getAllAppointments,
+  createNewAppointment,
+  updateAppointment,
+  deleteAppointment,
+};

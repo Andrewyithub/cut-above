@@ -3,15 +3,15 @@ const Appointment = require('../models/Appointment');
 const Schedule = require('../models/Schedule');
 const date = require('../utils/date');
 
-scheduleRouter.get('/', async (req, res) => {
+const getAllSchedules = async (req, res) => {
   const schedule = await Schedule.find({}).populate(
     'appointments',
     'start end client employee service status'
   );
   res.json(schedule);
-});
+};
 
-scheduleRouter.post('/', async (req, res) => {
+const createNewSchedule = async (req, res) => {
   const { dates, open, close } = req.body;
   const dateRangeToSchedule = date.generateRange(dates, open, close);
   const newSchedules = dateRangeToSchedule
@@ -22,9 +22,9 @@ scheduleRouter.post('/', async (req, res) => {
     message: 'New schedule added',
     data: newSchedules,
   });
-});
+};
 
-scheduleRouter.put('/:id', async (req, res) => {
+const addAppointmentToSchedule = async (req, res) => {
   const { appointment } = req.body;
   const bookedAppt = await Appointment.findOne({ _id: appointment });
   const schedule = await Schedule.findOne({ _id: req.params.id });
@@ -34,6 +34,10 @@ scheduleRouter.put('/:id', async (req, res) => {
   res
     .status(200)
     .json({ success: true, message: 'Schedule updated', data: schedule });
-});
+};
 
-module.exports = scheduleRouter;
+module.exports = {
+  getAllSchedules,
+  createNewSchedule,
+  addAppointmentToSchedule,
+};

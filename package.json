@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "email": "NODE_ENV=development node controllers/email.js"
   },
   "author": "",
   "license": "ISC",
@@ -19,7 +20,8 @@
     "express": "^4.18.2",
     "express-async-errors": "^3.1.1",
     "jsonwebtoken": "^9.0.0",
-    "mongoose": "^7.3.1"
+    "mongoose": "^7.3.1",
+    "nodemailer": "^6.9.3"
   },
   "devDependencies": {
     "crossenv": "^0.0.2-security",
