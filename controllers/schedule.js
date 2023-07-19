@@ -1,4 +1,3 @@
-const scheduleRouter = require('express').Router();
 const Appointment = require('../models/Appointment');
 const Schedule = require('../models/Schedule');
 const date = require('../utils/date');
