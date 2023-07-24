@@ -10,6 +10,6 @@ router
 router
   .route('/:id')
   .put(appointmentRouter.updateAppointment)
-  .delete(appointmentRouter.deleteAppointment);
+  .delete(appointmentRouter.cancelAppointment);
 
 module.exports = router;

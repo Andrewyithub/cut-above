@@ -31,6 +31,7 @@ app.use('/signup', require('./routes/register'));
 app.use('/schedule', require('./routes/schedule'));
 app.use(middleware.verifyJWT);
 app.use('/appointment', require('./routes/appointment'));
+app.use('/email', require('./routes/email'));
 app.use('/user', require('./routes/user'));
 
 module.exports = app;

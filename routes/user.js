@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const userRouter = require('../controllers/user');
 
-router.get('/', userRouter.getAllUsers);
-router.delete('/', userRouter.deleteUserData);
+router.route('/').get(userRouter.getAllUsers).delete(userRouter.removeUserData);
 
 module.exports = router;

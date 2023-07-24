@@ -45,8 +45,10 @@ const updateAppointment = async (req, res) => {
   });
 };
 
-const deleteAppointment = async (req, res) => {
-  const { date } = await Appointment.findByIdAndDelete(req.params.id);
+const cancelAppointment = async (req, res) => {
+  const { date, employee, start } = await Appointment.findByIdAndDelete(
+    req.params.id
+  );
   const scheduleToUpdate = await Schedule.findOne({ date });
   const index = scheduleToUpdate.appointments.findIndex(
     (appt) => appt._id.toString() === req.params.id
@@ -56,6 +58,7 @@ const deleteAppointment = async (req, res) => {
 
   res.status(200).json({
     success: true,
+    data: { date, employee, start },
     message: 'Appointment successfully cancelled',
   });
 };
@@ -64,5 +67,5 @@ module.exports = {
   getAllAppointments,
   createNewAppointment,
   updateAppointment,
-  deleteAppointment,
+  cancelAppointment,
 };

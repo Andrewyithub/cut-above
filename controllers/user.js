@@ -5,7 +5,7 @@ const getAllUsers = async (req, res) => {
   res.status(200).json(users);
 };
 
-const deleteUserData = async (req, res) => {
+const removeUserData = async (req, res) => {
   const user = await User.findByIdAndUpdate(req.user, {
     firstName: '[deleted]',
     lastName: '[deleted]',
@@ -26,4 +26,4 @@ const deleteUserData = async (req, res) => {
   });
 };
 
-module.exports = { getAllUsers, deleteUserData };
+module.exports = { getAllUsers, removeUserData };
