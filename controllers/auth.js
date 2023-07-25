@@ -7,15 +7,13 @@ const handleLogin = async (req, res) => {
 
   const { email, password } = req.body;
 
-  if (!email || !password)
-    return res
-      .status(400)
-      .json({ message: 'Email and password are required.' });
+  if (!email || !password) return res.sendStatus(400);
+  // .json({ message: 'Email and password are required.' });
 
   const foundUser = await User.findOne({ email }); // removed .exec();
   if (!foundUser) return res.sendStatus(401); //Unauthorized
   const match = await bcrypt.compare(password, foundUser.passwordHash);
-  if (!match) return res.status(401).json({ message: 'Unauthorized' });
+  if (!match) return res.sendStatus(401);
   const accessToken = jwt.sign(
     {
       id: foundUser._id,

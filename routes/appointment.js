@@ -1,15 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const appointmentRouter = require('../controllers/appointment');
+const middleware = require('../utils/middleware');
 
 router
   .route('/')
-  .get(appointmentRouter.getAllAppointments)
-  .post(appointmentRouter.createNewAppointment);
+  .get(middleware.verifyJWT, appointmentRouter.getAllAppointments)
+  .post(middleware.verifyJWT, appointmentRouter.createNewAppointment);
 
 router
   .route('/:id')
-  .put(appointmentRouter.updateAppointment)
-  .delete(appointmentRouter.cancelAppointment);
+  .put(middleware.verifyJWT, appointmentRouter.updateAppointment)
+  .delete(middleware.verifyJWT, appointmentRouter.cancelAppointment);
 
 module.exports = router;
