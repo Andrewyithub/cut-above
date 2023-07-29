@@ -1,14 +1,22 @@
-const appointmentRouter = require('express').Router();
 const Appointment = require('../models/Appointment');
 const Schedule = require('../models/Schedule');
 const User = require('../models/User');
 const dateServices = require('../utils/date');
+const email = require('../utils/email');
 
 const getAllAppointments = async (req, res) => {
   const appointments = await Appointment.find({
     $or: [{ client: req.user }, { employee: req.user }],
   });
   res.status(200).json(appointments);
+};
+
+const getOneAppointment = async (req, res) => {
+  const appointment = await Appointment.findOne({
+    emailId: req.params.id,
+  });
+  // .populate('employee', 'firstName');
+  res.status(200).json(appointment);
 };
 
 const createNewAppointment = async (req, res) => {
@@ -23,6 +31,7 @@ const createNewAppointment = async (req, res) => {
     service,
     client: clientToBook,
     employee: employeeToBook,
+    emailId: email.generateEmailId(),
   });
   await newAppt.save();
   res.status(201).json({
@@ -65,6 +74,7 @@ const cancelAppointment = async (req, res) => {
 
 module.exports = {
   getAllAppointments,
+  getOneAppointment,
   createNewAppointment,
   updateAppointment,
   cancelAppointment,

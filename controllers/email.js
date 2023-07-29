@@ -1,11 +1,11 @@
-const sendEmail = require('../utils/email');
+const email = require('../utils/email');
 const User = require('../models/User');
 
 const handleConfirmation = async (req, res) => {
   const { employee, date, time } = req.body;
   const user = await User.findOne({ _id: req.user });
   const bookedEmployee = await User.findOne({ _id: employee });
-  const emailSent = await sendEmail({
+  const emailSent = await email.sendEmail({
     receiver: user.email,
     employee: bookedEmployee.firstName,
     date,
@@ -19,7 +19,7 @@ const handleModification = async (req, res) => {
   const { employee, date, time } = req.body;
   const user = await User.findOne({ _id: req.user });
   const bookedEmployee = await User.findOne({ _id: employee });
-  const emailSent = await sendEmail({
+  const emailSent = await email.sendEmail({
     receiver: user.email,
     employee: bookedEmployee.firstName,
     date,
@@ -33,7 +33,7 @@ const handleCancellation = async (req, res) => {
   const { employee, date, time } = req.body;
   const user = await User.findOne({ _id: req.user });
   const cancelledEmployee = await User.findOne({ _id: employee });
-  const emailSent = await sendEmail({
+  const emailSent = await email.sendEmail({
     receiver: user.email,
     employee: cancelledEmployee.firstName,
     date,

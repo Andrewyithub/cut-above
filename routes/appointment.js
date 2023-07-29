@@ -10,6 +10,7 @@ router
 
 router
   .route('/:id')
+  .get(appointmentRouter.getOneAppointment)
   .put(middleware.verifyJWT, appointmentRouter.updateAppointment)
   .delete(middleware.verifyJWT, appointmentRouter.cancelAppointment);
 

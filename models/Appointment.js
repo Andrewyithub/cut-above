@@ -32,6 +32,10 @@ const appointmentSchema = new mongoose.Schema({
     required: true,
     default: 'scheduled',
   },
+  emailId: {
+    type: String,
+    required: true,
+  },
 });
 
 appointmentSchema.set('toJSON', {

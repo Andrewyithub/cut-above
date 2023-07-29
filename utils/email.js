@@ -1,6 +1,11 @@
 'use strict';
+const { v4: uuidv4 } = require('uuid');
 const nodemailer = require('nodemailer');
 const config = require('../config/config');
+
+const generateEmailId = () => {
+  return uuidv4();
+};
 
 const options = (employee, date, time, option) => {
   const templates = {
@@ -55,4 +60,4 @@ const sendEmail = async ({ receiver, employee, date, time, option }) => {
   });
 };
 
-module.exports = sendEmail;
+module.exports = { generateEmailId, sendEmail };

@@ -8,7 +8,6 @@ const mongoose = require('mongoose');
 const path = require('path');
 const corsOptions = require('./config/corsOptions');
 const logger = require('./utils/logger');
-const middleware = require('./utils/middleware');
 
 mongoose.set('strictQuery', false);
 mongoose
