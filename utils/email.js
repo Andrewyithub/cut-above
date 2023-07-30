@@ -7,17 +7,18 @@ const generateEmailId = () => {
   return uuidv4();
 };
 
-const options = (employee, date, time, option) => {
+const options = (employee, date, time, option, emailLink) => {
   const templates = {
     confirmation: {
       subject: `Your booking at Cut Above Barbershop:`, // Subject line
-      text: `Thank you for booking with us. You are confirmed for an appointment on ${date} at ${time} with ${employee}.`, // plain text body
-      html: `<div>Thank you for booking with us. You are confirmed for an appointment on ${date} at ${time} with ${employee}.</div>`, // html body
+      text: `Thank you for booking with us. You are confirmed for an appointment on ${date} at ${time} with ${employee}. If you need to modify or cancel your appointment, please log into your account on https://cutaboveshop.fly.dev or use this link: ${emailLink}`, // plain text body
+      html: `<div>Thank you for booking with us. You are confirmed for an appointment on ${date} at ${time} with ${employee}. If you need to modify or cancel your appointment, please log into your account on <a href="https://cutaboveshop.fly.dev">https://cutaboveshop.fly.dev</a> or use this link: <a href="${emailLink}">${emailLink}</a>
+      </div>`, // html body
     },
     modification: {
       subject: `Booking with Cut Above Barbershop has changed.`, // Subject line
-      text: `Your original booking has been changed. You are now confirmed for an appointment on ${date} at ${time} with ${employee}.`, // plain text body
-      html: `<div>Your original booking has been modified. You are now confirmed for an appointment on ${date} at ${time} with ${employee}.</div>`, // html body
+      text: `Your original booking has been changed. You are now confirmed for an appointment on ${date} at ${time} with ${employee}. If you need to modify or cancel your appointment, please log into your account on https://cutaboveshop.fly.dev or use this link: ${emailLink}`, // plain text body
+      html: `<div>Your original booking has been modified. You are now confirmed for an appointment on ${date} at ${time} with ${employee}. If you need to modify or cancel your appointment, please log into your account on <a href="https://cutaboveshop.fly.dev">https://cutaboveshop.fly.dev</a> or use this link: <a href="${emailLink}">${emailLink}</a></div>`, // html body
     },
     cancellation: {
       subject: `Booking with Cut Above Barbershop has cancelled.`, // Subject line
@@ -33,7 +34,14 @@ const options = (employee, date, time, option) => {
   }
 };
 
-const sendEmail = async ({ receiver, employee, date, time, option }) => {
+const sendEmail = async ({
+  receiver,
+  employee,
+  date,
+  time,
+  option,
+  emailLink,
+}) => {
   const transporter = nodemailer.createTransport({
     service: config.EMAIL_SERVICE,
     auth: {
@@ -47,7 +55,7 @@ const sendEmail = async ({ receiver, employee, date, time, option }) => {
     to: `${receiver}`,
   };
 
-  const emailTemplate = options(employee, date, time, option);
+  const emailTemplate = options(employee, date, time, option, emailLink);
   const fullEmailOptions = { ...senderReceiverOptions, ...emailTemplate };
 
   // Send Email
