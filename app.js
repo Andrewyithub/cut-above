@@ -30,7 +30,7 @@ app.use('/logout', require('./routes/logout'));
 app.use('/refresh', require('./routes/refreshToken'));
 app.use('/signup', require('./routes/register'));
 app.use('/schedule', require('./routes/schedule'));
-app.use('/appointment', require('./routes/appointment'));
+app.use('/api/appointment', require('./routes/appointment'));
 app.use('/email', require('./routes/email'));
 app.use('/user', require('./routes/user'));
 app.get('*', (req, res) => {
