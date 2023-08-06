@@ -8,6 +8,7 @@ const mongoose = require('mongoose');
 const path = require('path');
 const corsOptions = require('./config/corsOptions');
 const logger = require('./utils/logger');
+const middleware = require('./utils/middleware');
 
 mongoose.set('strictQuery', false);
 mongoose
@@ -36,5 +37,6 @@ app.use('/api/user', require('./routes/user'));
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
+app.use(middleware.errorHandler);
 
 module.exports = app;

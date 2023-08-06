@@ -1,7 +1,7 @@
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const User = require("../models/User");
-const AppError = require("../utils/AppError");
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const User = require('../models/User');
+const AppError = require('../utils/AppError');
 
 const handleLogin = async (req, res) => {
   const cookies = req.cookies;
@@ -11,26 +11,28 @@ const handleLogin = async (req, res) => {
   // if (!email || !password) return res.sendStatus(400);
   // .json({ message: 'Email and password are required.' });
   if (!email || !password)
-    throw new AppError(400, "Email and password are required.");
+    throw new AppError(400, 'Email and password are required.');
 
   const foundUser = await User.findOne({ email }); // removed .exec();
   // if (!foundUser) return res.sendStatus(401); //Unauthorized
-  if (!foundUser) throw new AppError(401, "Unauthorized");
+  if (!foundUser) throw new AppError(401, 'Unauthorized');
   const match = await bcrypt.compare(password, foundUser.passwordHash);
-  if (!match) throw new AppError(401, "Unauthorized");
+  if (!match) {
+    throw new AppError(401, 'Unauthorized');
+  }
   const accessToken = jwt.sign(
     {
       id: foundUser._id,
     },
     process.env.ACCESS_TOKEN_SECRET,
-    { expiresIn: "1h" }
+    { expiresIn: '1h' }
   );
   const newRefreshToken = jwt.sign(
     {
       id: foundUser._id,
     },
     process.env.REFRESH_TOKEN_SECRET,
-    { expiresIn: "1d" }
+    { expiresIn: '1d' }
   );
 
   let newRefreshTokenArray = !cookies?.jwt
@@ -53,23 +55,23 @@ const handleLogin = async (req, res) => {
     }
 
     // clear out current session cookie
-    res.clearCookie("jwt", { httpOnly: true, sameSite: "None", secure: true });
+    res.clearCookie('jwt', { httpOnly: true, sameSite: 'None', secure: true });
   }
 
   foundUser.refreshToken = [...newRefreshTokenArray, newRefreshToken];
   await foundUser.save();
 
   // Creates Secure Cookie with refresh token
-  res.cookie("jwt", newRefreshToken, {
+  res.cookie('jwt', newRefreshToken, {
     httpOnly: true,
     secure: true,
-    sameSite: "None",
+    sameSite: 'None',
     maxAge: 1 * 60 * 60 * 1000, // 1 day
   });
 
   res.status(200).json({
     success: true,
-    message: "Successfully logged in",
+    message: 'Successfully logged in',
     user: foundUser.email,
     role: foundUser.role,
     token: accessToken,
