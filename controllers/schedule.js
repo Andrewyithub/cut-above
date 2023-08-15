@@ -16,10 +16,11 @@ const createNewSchedule = async (req, res) => {
   const newSchedules = dateRangeToSchedule
     .map((schedule) => new Schedule(schedule))
     .map((newSchedule) => newSchedule.save());
-  await Promise.all(newSchedules);
+  const savedSchedules = await Promise.all(newSchedules);
   res.status(201).json({
+    success: true,
     message: 'New schedule added',
-    data: newSchedules,
+    data: savedSchedules,
   });
 };
 
