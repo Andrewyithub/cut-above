@@ -9,17 +9,14 @@ dayjs.extend(timezone);
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
 
-// const convertToEST = (date) => dayjs(date).format('YYYY-MM-DD hh:mm A');
-
-const convertToEST = (date) => {
-  const formattedDate = dayjs(date).format('YYYY-MM-DD');
-  const dateObj = dayjs.tz(formattedDate, 'America/New_York');
-  return dateObj;
+const easternDateTime = (inputDate, inputTime) => {
+  const dateObj = dayjs.tz(inputDate, 'America/New_York');
+  const [hour, minute] = inputTime.split(':');
+  return dateObj.hour(Number(hour)).minute(Number(minute));
 };
 
-const convertToEstTime = (dateObj, time) => {
-  const [hour, min] = time.split(':');
-  return dateObj.hour(Number(hour)).minute(Number(min));
+const easternDate = (inputDate) => {
+  return dayjs.tz(inputDate, 'America/New_York');
 };
 
 const generateRange = (dates, open, close) => {
@@ -46,4 +43,4 @@ const generateRange = (dates, open, close) => {
   return datesToSchedule;
 };
 
-module.exports = { convertToEST, convertToEstTime, generateRange };
+module.exports = { easternDate, easternDateTime, generateRange };

@@ -23,11 +23,10 @@ const createNewAppointment = async (req, res) => {
   const { date, start, end, service, employee } = req.body;
   const clientToBook = await User.findOne({ _id: req.user });
   const employeeToBook = await User.findOne({ _id: employee });
-  const formattedDate = dateServices.convertToEST(date);
   const newAppt = new Appointment({
-    date: formattedDate,
-    start: dateServices.convertToEstTime(formattedDate, start),
-    end: dateServices.convertToEstTime(formattedDate, end),
+    date: dateServices.easternDate(date),
+    start: dateServices.easternDateTime(date, start),
+    end: dateServices.easternDateTime(date, end),
     service,
     client: clientToBook,
     employee: employeeToBook,
