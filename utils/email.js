@@ -25,6 +25,11 @@ const options = (employee, date, time, option, emailLink) => {
       text: `Your booking  on ${date} at ${time} with ${employee} has been cancelled. We are sorry to hear you can't make it. For any future needs, we are always here for you.`, // plain text body
       html: `<div>our booking  on ${date} at ${time} with ${employee} has been cancelled. We are sorry to hear you can't make it. For any future needs, we are always here for you.</div>`, // html body
     },
+    emailChange: {
+      subject: 'Your email has been updated.',
+      text: '',
+      html: '',
+    },
   };
 
   if (option in templates) {

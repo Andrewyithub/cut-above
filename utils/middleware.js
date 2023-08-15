@@ -1,5 +1,6 @@
 const logger = require('./logger');
 const jwt = require('jsonwebtoken');
+const AppError = require('./AppError');
 
 const requestLogger = (req, res, next) => {
   // prevents logging of user information
@@ -15,24 +16,36 @@ const requestLogger = (req, res, next) => {
 const verifyJWT = (req, res, next) => {
   const authHeader = req.headers.authorization || req.headers.Authorization;
   if (!authHeader?.startsWith('Bearer ')) {
-    console.log('no bearer');
-    return res.sendStatus(401);
+    // return res.sendStatus(401);
+    throw new AppError(401, 'Unauthorized');
   }
   const token = authHeader.split(' ')[1];
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
     if (err) {
-      return res.sendStatus(403); //invalid token
+      // return res.sendStatus(403); //invalid token
+      next(err);
     }
     req.user = decoded.id;
     next();
   });
 };
 
-const errorHandler = (error, request, response, next) => {
-  logger.error(error.name);
-  logger.error(error.message);
-  response.status(500).send(error.message);
-  next(error);
+const errorHandler = (err, req, res, next) => {
+  logger.error(err.name);
+  logger.error(err.message);
+  if (err.name === 'JsonWebTokenError') {
+    return res.status(401).json({
+      error: 'invalid token',
+    });
+  } else if (err.name === 'TokenExpiredError') {
+    return res.status(401).json({
+      error: 'token expired',
+    });
+  } else if (err instanceof AppError) {
+    return res.status(err.statusCode).json({ error: err.message });
+  }
+
+  return res.status(500).json({ error: err.message });
 };
 
 module.exports = { errorHandler, requestLogger, verifyJWT };

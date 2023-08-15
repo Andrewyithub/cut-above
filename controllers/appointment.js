@@ -49,7 +49,7 @@ const updateAppointment = async (req, res) => {
   );
   res.status(200).json({
     success: true,
-    message: 'Appointment successfully reserved',
+    message: 'Appointment successfully updated',
     data: updatedAppointment,
   });
 };

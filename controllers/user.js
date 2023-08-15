@@ -11,7 +11,7 @@ const changeEmail = async (req, res) => {
   const user = await User.findById(req.user);
   const existingUser = await User.findOne({ email });
   if (existingUser) {
-    return response.status(400).json({ error: 'Email must be unique' });
+    return res.status(400).json({ error: 'Email must be unique' });
   }
   user.email = email;
   await user.save();

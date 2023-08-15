@@ -1,19 +1,25 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const AppError = require('../utils/AppError');
 
 const handleLogin = async (req, res) => {
   const cookies = req.cookies;
 
   const { email, password } = req.body;
 
-  if (!email || !password) return res.sendStatus(400);
+  // if (!email || !password) return res.sendStatus(400);
   // .json({ message: 'Email and password are required.' });
+  if (!email || !password)
+    throw new AppError(400, 'Email and password are required.');
 
   const foundUser = await User.findOne({ email }); // removed .exec();
-  if (!foundUser) return res.sendStatus(401); //Unauthorized
+  // if (!foundUser) return res.sendStatus(401); //Unauthorized
+  if (!foundUser) throw new AppError(401, 'Unauthorized');
   const match = await bcrypt.compare(password, foundUser.passwordHash);
-  if (!match) return res.sendStatus(401);
+  if (!match) {
+    throw new AppError(401, 'Unauthorized');
+  }
   const accessToken = jwt.sign(
     {
       id: foundUser._id,
