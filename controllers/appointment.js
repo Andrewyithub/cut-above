@@ -13,6 +13,7 @@ const getAllAppointments = async (req, res) => {
 
 const getOneAppointment = async (req, res) => {
   const appointment = await Appointment.findOne({
+    // _id: req.params.id,
     emailId: req.params.id,
   });
   // .populate('employee', 'firstName');
