@@ -41,11 +41,10 @@ const createNewAppointment = async (req, res) => {
   });
 };
 
-const updateAppointment = async (req, res) => {
-  const updatedAppointment = await Appointment.findByIdAndUpdate(
-    req.params.id,
-    req.body,
-    { new: true, runValidators: true, context: 'query' }
+const updateAppointmentStatus = async (req, res) => {
+  const updatedAppointment = await Appointment.updateOne(
+    { _id: req.params.id },
+    { $set: { status: req.body.status } }
   );
   res.status(200).json({
     success: true,
@@ -76,6 +75,6 @@ module.exports = {
   getAllAppointments,
   getOneAppointment,
   createNewAppointment,
-  updateAppointment,
+  updateAppointmentStatus,
   cancelAppointment,
 };
