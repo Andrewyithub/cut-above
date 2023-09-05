@@ -1,5 +1,6 @@
 const email = require('../utils/email');
 const User = require('../models/User');
+const jwt = require("jsonwebtoken");
 
 const handleConfirmation = async (req, res) => {
   const { employee, date, time, emailId } = req.body;
@@ -47,9 +48,21 @@ const handleCancellation = async (req, res) => {
 
 const handlePasswordReset = async (req, res) => {
   const user = await User.findOne({ email: req.body.email });
+  const resetPasswordId = email.generateId()
+const resetToken = jwt.sign(
+  {
+    id: resetPasswordId
+  },
+  // RESET_TOKEN_SECRET
+  // process.env.REFRESH_TOKEN_SECRET,
+  { expiresIn: '1h' }
+);
+// push id to user email id
+user.emailToken.push(resetPasswordId)
   const emailSent = await email.sendEmail({
     receiver: user.email,
     option: 'reset password',
+    emailLink: `https://cutaboveshop.fly.dev/resetpw/${resetToken}`
   });
   res.status(200).json({
     success: true,

@@ -11,5 +11,7 @@ router
 
 router.route('/email').put(middleware.verifyJWT, userRouter.changeEmail);
 router.route('/password').put(middleware.verifyJWT, userRouter.changePassword);
+router.route('/validate-token').get(userRouter.validateToken)
+router.route('/resetpw').post(userRouter.resetPassword)
 
 module.exports = router;

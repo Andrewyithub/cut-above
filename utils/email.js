@@ -21,9 +21,10 @@ const options = (employee, date, time, option, emailLink) => {
       subject: `Booking with Cut Above Barbershop has cancelled.`, // Subject line
       text: `Your booking  on ${date} at ${time} with ${employee} has been cancelled. We are sorry to hear you can't make it. For any future needs, we are always here for you.`, // plain text body
     },
+    // Link immediately disabled?
     'reset password': {
       subject: 'Instructions to reset your password.',
-      text: `Follow this link to change your password: https://cutaboveshop.fly.dev. Once clicked this link will be immediately disabled. You also only have one hour before this link becomes inactive.`,
+      text: `Follow this link to change your password: ${emailLink}. Once clicked this link will be immediately disabled. You also only have one hour before this link becomes inactive.`,
     },
   };
 
