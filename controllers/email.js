@@ -45,8 +45,22 @@ const handleCancellation = async (req, res) => {
   res.status(200).json({ success: true, message: 'Cancellation email sent' });
 };
 
+const handlePasswordReset = async (req, res) => {
+  const user = await User.findOne({ email: req.body.email });
+  const emailSent = await email.sendEmail({
+    receiver: user.email,
+    option: 'reset password',
+  });
+  res.status(200).json({
+    success: true,
+    message:
+      'If an user exists with this email, an email with reset instructions has been sent.',
+  });
+};
+
 module.exports = {
   handleConfirmation,
   handleModification,
   handleCancellation,
+  handlePasswordReset,
 };

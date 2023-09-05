@@ -24,7 +24,11 @@ const changeEmail = async (req, res) => {
 
 const changePassword = async (req, res) => {
   const { password } = req.body;
-  const user = await User.findById(req.user);
+  const userId = req.user || req.params.id;
+  const user = await User.findById(userId);
+  console.log('====================================');
+  console.log(user);
+  console.log('====================================');
   const saltRounds = 10;
   const passwordHash = await bcrypt.hash(password, saltRounds);
   user.passwordHash = passwordHash;

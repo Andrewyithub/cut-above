@@ -21,6 +21,10 @@ const options = (employee, date, time, option, emailLink) => {
       subject: `Booking with Cut Above Barbershop has cancelled.`, // Subject line
       text: `Your booking  on ${date} at ${time} with ${employee} has been cancelled. We are sorry to hear you can't make it. For any future needs, we are always here for you.`, // plain text body
     },
+    'reset password': {
+      subject: 'Instructions to reset your password.',
+      text: `Follow this link to change your password: https://cutaboveshop.fly.dev. Once clicked this link will be immediately disabled. You also only have one hour before this link becomes inactive.`,
+    },
   };
 
   if (option in templates) {
@@ -38,6 +42,9 @@ const sendEmail = async ({
   option,
   emailLink,
 }) => {
+  console.log('====================================');
+  console.log('sendEmail received');
+  console.log('====================================');
   const transporter = nodemailer.createTransport({
     service: config.EMAIL_SERVICE,
     auth: {

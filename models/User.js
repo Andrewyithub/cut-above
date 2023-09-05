@@ -23,6 +23,7 @@ const userSchema = new mongoose.Schema({
     type: String,
   },
   refreshToken: [String],
+  emailToken: [String],
 });
 
 userSchema.set('toJSON', {
