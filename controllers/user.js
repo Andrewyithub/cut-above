@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
+const jwt = require('jsonwebtoken');
 
 const getAllUsers = async (req, res) => {
   const users = await User.find({});
@@ -26,9 +27,6 @@ const changePassword = async (req, res) => {
   const { password } = req.body;
   const userId = req.user || req.params.id;
   const user = await User.findById(userId);
-  console.log('====================================');
-  console.log(user);
-  console.log('====================================');
   const saltRounds = 10;
   const passwordHash = await bcrypt.hash(password, saltRounds);
   user.passwordHash = passwordHash;
@@ -60,14 +58,22 @@ const removeUserData = async (req, res) => {
 };
 
 const validateToken = async (req, res) => {
+  console.log('====================================');
+  console.log('token validating');
+  console.log('====================================');
   const { token } = req.params;
-
+  console.log('====================================');
+  console.log(token);
+  console.log('====================================');
   jwt.verify(token, process.env.RESET_TOKEN_SECRET, (err, decoded) => {
     if (err) {
       return res.status(400).json({ message: 'Invalid or expired token' });
     }
 
     // Token is valid; you can access the payload (decoded) if needed
+    console.log('====================================');
+    console.log('decoded: ', decoded);
+    console.log('====================================');
     res.status(200).json({ message: 'Token is valid' });
   });
 };
@@ -76,7 +82,7 @@ const resetPassword = async (req, res) => {
   const { token, newPassword } = req.body;
 
   // verify token
-  jwt.verify(token, secretKey, async (err, decoded) => {
+  jwt.verify(token, process.env.RESET_TOKEN_SECRET, async (err, decoded) => {
     if (err) {
       return res.status(400).json({ message: 'Invalid or expired token' });
     }
@@ -84,13 +90,17 @@ const resetPassword = async (req, res) => {
     // Token is valid; update the password for the user associated with the token
     // You should implement your password update logic here
 
-    const emailLink = decoded.id;
-    const user = await User.findOne({ emailLink });
+    const emailToken = decoded.id;
+    const user = await User.findOne({ emailToken });
+    console.log('====================================');
+    console.log('user found', user);
+    console.log('====================================');
+    const saltRounds = 10;
     const passwordHash = await bcrypt.hash(newPassword, saltRounds);
     user.passwordHash = passwordHash;
-    const newEmailTokenArr = emailToken.filter((e) => e !== emailLink);
+    const newEmailTokenArr = user.emailToken.filter((e) => e !== emailToken);
     user.emailToken = newEmailTokenArr;
-    user.save();
+    await user.save();
     res.status(200).json({ message: 'Password reset successful' });
   });
 };

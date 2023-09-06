@@ -53,17 +53,19 @@ const handlePasswordReset = async (req, res) => {
     {
       id: resetPasswordId,
     },
-    // RESET_TOKEN_SECRET
-    process.env.REFRESH_TOKEN_SECRET,
+    process.env.RESET_TOKEN_SECRET,
     { expiresIn: '1h' }
   );
-  // push id to user email id
   user.emailToken.push(resetPasswordId);
+  await user.save();
   const emailSent = await email.sendEmail({
     receiver: user.email,
     option: 'reset password',
-    emailLink: `https://cutaboveshop.fly.dev/resetpw/${resetToken}`,
+    emailLink: `https://cutaboveshop.fly.dev/resetpw/?token=${resetToken}`,
   });
+  console.log('====================================');
+  console.log(emailSent);
+  console.log('====================================');
   res.status(200).json({
     success: true,
     message:
