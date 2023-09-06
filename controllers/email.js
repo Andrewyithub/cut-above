@@ -63,9 +63,6 @@ const handlePasswordReset = async (req, res) => {
     option: 'reset password',
     emailLink: `https://cutaboveshop.fly.dev/resetpw/?token=${resetToken}`,
   });
-  console.log('====================================');
-  console.log(emailSent);
-  console.log('====================================');
   res.status(200).json({
     success: true,
     message:

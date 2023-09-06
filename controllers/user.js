@@ -58,22 +58,11 @@ const removeUserData = async (req, res) => {
 };
 
 const validateToken = async (req, res) => {
-  console.log('====================================');
-  console.log('token validating');
-  console.log('====================================');
   const { token } = req.params;
-  console.log('====================================');
-  console.log(token);
-  console.log('====================================');
   jwt.verify(token, process.env.RESET_TOKEN_SECRET, (err, decoded) => {
     if (err) {
       return res.status(400).json({ message: 'Invalid or expired token' });
     }
-
-    // Token is valid; you can access the payload (decoded) if needed
-    console.log('====================================');
-    console.log('decoded: ', decoded);
-    console.log('====================================');
     res.status(200).json({ message: 'Token is valid' });
   });
 };
@@ -92,9 +81,6 @@ const resetPassword = async (req, res) => {
 
     const emailToken = decoded.id;
     const user = await User.findOne({ emailToken });
-    console.log('====================================');
-    console.log('user found', user);
-    console.log('====================================');
     const saltRounds = 10;
     const passwordHash = await bcrypt.hash(newPassword, saltRounds);
     user.passwordHash = passwordHash;
