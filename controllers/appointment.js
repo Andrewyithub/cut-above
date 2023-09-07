@@ -1,8 +1,10 @@
+const mongoose = require('mongoose')
 const Appointment = require('../models/Appointment');
 const Schedule = require('../models/Schedule');
 const User = require('../models/User');
 const dateServices = require('../utils/date');
 const email = require('../utils/email');
+const AppError = require('../utils/AppError')
 
 const getAllAppointments = async (req, res) => {
   const appointments = await Appointment.find({
@@ -20,26 +22,69 @@ const getOneAppointment = async (req, res) => {
   res.status(200).json(appointment);
 };
 
-const createNewAppointment = async (req, res) => {
+const bookAppointment = async (req,res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();  
+  try {
+  // create new Appointment
   const { date, start, end, service, employee } = req.body;
-  const clientToBook = await User.findOne({ _id: req.user });
-  const employeeToBook = await User.findOne({ _id: employee });
+  const client = await User.findOne({ _id: req.user });
+  const employee = await User.findOne({ _id: employee });
+  const emailId = email.generateEmailId(),
   const newAppt = new Appointment({
     date: dateServices.easternDate(date),
     start: dateServices.easternDateTime(date, start),
     end: dateServices.easternDateTime(date, end),
     service,
-    client: clientToBook,
-    employee: employeeToBook,
-    emailId: email.generateEmailId(),
+    client,
+    employee,
+    emailId 
   });
-  await newAppt.save();
-  res.status(201).json({
-    success: true,
-    message: 'Appointment successfully reserved',
-    data: newAppt,
+  await newAppt.save({session});
+
+  // Add to schedule
+  const schedule = await Schedule.findOne({ date });
+  schedule.appointments.push(newAppt);
+  await schedule.save({session});
+  await session.commitTransaction();
+
+  // Send confirmation
+  const emailSent = await email.sendEmail({
+    receiver: client.email,
+    employee: employee.firstName,
+    date: start,
+    time,
+    option: 'confirmation',
+    emailLink: `https://cutaboveshop.fly.dev/appointment/${emailId}`,
   });
-};
+  } catch (err) {
+    await session.abortTransaction();
+throw new AppError(500, 'Failed to book appointment.')
+  } finally {
+    session.endSession()
+  }
+}
+
+// const createNewAppointment = async (req, res) => {
+//   const { date, start, end, service, employee } = req.body;
+//   const clientToBook = await User.findOne({ _id: req.user });
+//   const employeeToBook = await User.findOne({ _id: employee });
+//   const newAppt = new Appointment({
+//     date: dateServices.easternDate(date),
+//     start: dateServices.easternDateTime(date, start),
+//     end: dateServices.easternDateTime(date, end),
+//     service,
+//     client: clientToBook,
+//     employee: employeeToBook,
+//     emailId: email.generateEmailId(),
+//   });
+//   await newAppt.save();
+//   res.status(201).json({
+//     success: true,
+//     message: 'Appointment successfully reserved',
+//     data: newAppt,
+//   });
+// };
 
 const updateAppointmentStatus = async (req, res) => {
   const updatedAppointment = await Appointment.updateOne(
@@ -74,7 +119,8 @@ const cancelAppointment = async (req, res) => {
 module.exports = {
   getAllAppointments,
   getOneAppointment,
-  createNewAppointment,
+  bookAppointment,
+  // createNewAppointment,
   updateAppointmentStatus,
   cancelAppointment,
 };
