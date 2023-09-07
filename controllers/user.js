@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
+const jwt = require('jsonwebtoken');
 
 const getAllUsers = async (req, res) => {
   const users = await User.find({});
@@ -26,9 +27,6 @@ const changePassword = async (req, res) => {
   const { password } = req.body;
   const userId = req.user || req.params.id;
   const user = await User.findById(userId);
-  console.log('====================================');
-  console.log(user);
-  console.log('====================================');
   const saltRounds = 10;
   const passwordHash = await bcrypt.hash(password, saltRounds);
   user.passwordHash = passwordHash;
@@ -59,4 +57,57 @@ const removeUserData = async (req, res) => {
   });
 };
 
-module.exports = { getAllUsers, changeEmail, changePassword, removeUserData };
+const removeResetToken = async (resetPasswordId) => {
+  const user = await User.findOne({ emailToken: resetPasswordId });
+  if (user) {
+    user.emailToken = user.emailToken.filter((id) => id !== resetPasswordId);
+    await user.save();
+  }
+};
+
+const validateToken = async (req, res) => {
+  const { token } = req.params;
+  let decoded;
+  try {
+    decoded = jwt.verify(token, process.env.RESET_TOKEN_SECRET);
+  } catch (err) {
+    decoded = jwt.decode(token);
+    const { id: resetPasswordId } = decoded;
+    removeResetToken(resetPasswordId);
+    return res.status(400).json({ error: 'Expired token' });
+  }
+  res.status(200).json({ message: 'Token is valid' });
+};
+
+const resetPassword = async (req, res) => {
+  const { token, newPassword } = req.body;
+  let decoded;
+  try {
+    decoded = jwt.verify(token, process.env.RESET_TOKEN_SECRET);
+  } catch (err) {
+    decoded = jwt.decode(token);
+    removeResetToken(decoded.id);
+    return res.status(400).json({ error: 'Expired token' });
+  }
+  const user = await User.findOne({ emailToken: decoded.id });
+  if (!user) {
+    return res
+      .status(400)
+      .json({ error: 'No user associated with this token' });
+  }
+  const saltRounds = 10;
+  const passwordHash = await bcrypt.hash(newPassword, saltRounds);
+  user.passwordHash = passwordHash;
+  user.emailToken = user.emailToken.filter((id) => id !== decoded.id);
+  await user.save();
+  res.status(200).json({ success: true, message: 'Password updated' });
+};
+
+module.exports = {
+  getAllUsers,
+  changeEmail,
+  changePassword,
+  removeUserData,
+  validateToken,
+  resetPassword,
+};

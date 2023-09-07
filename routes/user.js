@@ -3,6 +3,8 @@ const router = express.Router();
 const userRouter = require('../controllers/user');
 const middleware = require('../utils/middleware');
 
+router.route('/validate-token/:token').get(userRouter.validateToken);
+router.route('/resetpw').post(userRouter.resetPassword);
 router
   .route('/')
   .get(middleware.verifyJWT, userRouter.getAllUsers)
