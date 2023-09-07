@@ -57,38 +57,50 @@ const removeUserData = async (req, res) => {
   });
 };
 
+const removeResetToken = async (resetPasswordId) => {
+  const user = await User.findOne({ emailToken: resetPasswordId });
+  if (user) {
+    user.emailToken = user.emailToken.filter((id) => id !== resetPasswordId);
+    await user.save();
+  }
+};
+
 const validateToken = async (req, res) => {
   const { token } = req.params;
-  jwt.verify(token, process.env.RESET_TOKEN_SECRET, (err, decoded) => {
-    if (err) {
-      return res.status(400).json({ message: 'Invalid or expired token' });
-    }
-    res.status(200).json({ message: 'Token is valid' });
-  });
+  let decoded;
+  try {
+    decoded = jwt.verify(token, process.env.RESET_TOKEN_SECRET);
+  } catch (err) {
+    decoded = jwt.decode(token);
+    const { id: resetPasswordId } = decoded;
+    removeResetToken(resetPasswordId);
+    return res.status(400).json({ error: 'Expired token' });
+  }
+  res.status(200).json({ message: 'Token is valid' });
 };
 
 const resetPassword = async (req, res) => {
   const { token, newPassword } = req.body;
-
-  // verify token
-  jwt.verify(token, process.env.RESET_TOKEN_SECRET, async (err, decoded) => {
-    if (err) {
-      return res.status(400).json({ message: 'Invalid or expired token' });
-    }
-
-    // Token is valid; update the password for the user associated with the token
-    // You should implement your password update logic here
-
-    const emailToken = decoded.id;
-    const user = await User.findOne({ emailToken });
-    const saltRounds = 10;
-    const passwordHash = await bcrypt.hash(newPassword, saltRounds);
-    user.passwordHash = passwordHash;
-    const newEmailTokenArr = user.emailToken.filter((e) => e !== emailToken);
-    user.emailToken = newEmailTokenArr;
-    await user.save();
-    res.status(200).json({ message: 'Password reset successful' });
-  });
+  let decoded;
+  try {
+    decoded = jwt.verify(token, process.env.RESET_TOKEN_SECRET);
+  } catch (err) {
+    decoded = jwt.decode(token);
+    removeResetToken(decoded.id);
+    return res.status(400).json({ error: 'Expired token' });
+  }
+  const user = await User.findOne({ emailToken: decoded.id });
+  if (!user) {
+    return res
+      .status(400)
+      .json({ error: 'No user associated with this token' });
+  }
+  const saltRounds = 10;
+  const passwordHash = await bcrypt.hash(newPassword, saltRounds);
+  user.passwordHash = passwordHash;
+  user.emailToken = user.emailToken.filter((id) => id !== decoded.id);
+  await user.save();
+  res.status(200).json({ success: true, message: 'Password updated' });
 };
 
 module.exports = {
