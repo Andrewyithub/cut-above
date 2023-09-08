@@ -78,26 +78,41 @@ const bookAppointment = async (req, res) => {
   }
 };
 
-// const createNewAppointment = async (req, res) => {
-//   const { date, start, end, service, employee } = req.body;
-//   const clientToBook = await User.findOne({ _id: req.user });
-//   const employeeToBook = await User.findOne({ _id: employee });
-//   const newAppt = new Appointment({
-//     date: dateServices.easternDate(date),
-//     start: dateServices.easternDateTime(date, start),
-//     end: dateServices.easternDateTime(date, end),
-//     service,
-//     client: clientToBook,
-//     employee: employeeToBook,
-//     emailId: email.generateEmailId(),
-//   });
-//   await newAppt.save();
-//   res.status(201).json({
-//     success: true,
-//     message: 'Appointment successfully reserved',
-//     data: newAppt,
-//   });
-// };
+const modifyAppointment = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    // const appointment = await Appointment.findById(req.params.id);
+    // if (req.body.status) appointment.status = req.body.status;
+    // await appointment.save({ session });
+    // await session.commitTransaction();
+    // res.status(200).json({
+    //   success: true,
+    //   message: 'Appointment updated',
+    // });
+    const appointment = await Appointment.findById(req.params.id, null, {
+      session,
+    });
+    console.log('====================================');
+    console.log(appointment);
+    console.log('====================================');
+    appointment.status = 'checked-in';
+
+    await appointment.save({ session });
+
+    await session.commitTransaction();
+    res.status(200).json({
+      success: true,
+      message: 'Test worked',
+    });
+  } catch (err) {
+    console.log(err);
+    await session.abortTransaction();
+    throw new AppError(500, 'Failed to update appointment');
+  } finally {
+    session.endSession();
+  }
+};
 
 const updateAppointmentStatus = async (req, res) => {
   const updatedAppointment = await Appointment.updateOne(
@@ -133,7 +148,29 @@ module.exports = {
   getAllAppointments,
   getOneAppointment,
   bookAppointment,
+  modifyAppointment,
   // createNewAppointment,
-  updateAppointmentStatus,
+  // updateAppointmentStatus,
   cancelAppointment,
 };
+
+// const createNewAppointment = async (req, res) => {
+//   const { date, start, end, service, employee } = req.body;
+//   const clientToBook = await User.findOne({ _id: req.user });
+//   const employeeToBook = await User.findOne({ _id: employee });
+//   const newAppt = new Appointment({
+//     date: dateServices.easternDate(date),
+//     start: dateServices.easternDateTime(date, start),
+//     end: dateServices.easternDateTime(date, end),
+//     service,
+//     client: clientToBook,
+//     employee: employeeToBook,
+//     emailId: email.generateEmailId(),
+//   });
+//   await newAppt.save();
+//   res.status(201).json({
+//     success: true,
+//     message: 'Appointment successfully reserved',
+//     data: newAppt,
+//   });
+// };

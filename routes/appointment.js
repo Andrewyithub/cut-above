@@ -11,7 +11,7 @@ router
 router
   .route('/:id')
   .get(appointmentRouter.getOneAppointment)
-  .put(middleware.verifyJWT, appointmentRouter.updateAppointmentStatus)
+  .put(middleware.verifyJWT, appointmentRouter.modifyAppointment)
   .delete(middleware.verifyJWT, appointmentRouter.cancelAppointment);
 
 module.exports = router;
