@@ -6,7 +6,7 @@ const middleware = require('../utils/middleware');
 router
   .route('/')
   .get(middleware.verifyJWT, appointmentRouter.getAllAppointments)
-  .post(middleware.verifyJWT, appointmentRouter.createNewAppointment);
+  .post(middleware.verifyJWT, appointmentRouter.bookAppointment);
 
 router
   .route('/:id')
