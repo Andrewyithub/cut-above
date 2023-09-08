@@ -38,15 +38,20 @@ const bookAppointment = async (req, res) => {
       end: dateServices.easternDateTime(date, end),
       service,
       client,
-      employee,
+      employee: employeeToBook,
       emailId,
     });
+    // Validate availability
+    const schedule = await Schedule.findOne({
+      date: dateServices.easternDate(date),
+    }).populate('appointments', 'start end employee');
+    const open = dateServices.checkAvailability(schedule, newAppt);
+    if (!open) {
+      return res.status(500).json({ error: 'Time slot no longer available' });
+    }
     await newAppt.save({ session });
 
     // Add to schedule
-    const schedule = await Schedule.findOne({
-      date: dateServices.easternDate(date),
-    });
     schedule.appointments.push(newAppt);
     await schedule.save({ session });
 
