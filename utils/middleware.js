@@ -30,9 +30,16 @@ const verifyJWT = (req, res, next) => {
   });
 };
 
-const errorHandler = (err, req, res, next) => {
+const errorHandler = async (err, req, res, next) => {
   logger.error(err.name);
   logger.error(err.message);
+  // Check if there is an active session
+  if (req.session) {
+    // Abort any open transactions
+    await req.session.abortTransaction();
+    // End the session
+    req.session.endSession();
+  }
   if (err.name === 'JsonWebTokenError') {
     return res.status(401).json({
       error: 'invalid token',
