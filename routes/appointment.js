@@ -9,9 +9,16 @@ router
   .post(middleware.verifyJWT, appointmentRouter.bookAppointment);
 
 router
+  .route('/status/:id')
+  .put(middleware.verifyJWT, appointmentRouter.updateAppointmentStatus);
+
+router
   .route('/:id')
   .get(appointmentRouter.getOneAppointment)
-  .put(middleware.verifyJWT, appointmentRouter.modifyAppointment)
+  .put(
+    // middleware.verifyJWT,
+    appointmentRouter.modifyAppointment
+  )
   .delete(middleware.verifyJWT, appointmentRouter.cancelAppointment);
 
 module.exports = router;

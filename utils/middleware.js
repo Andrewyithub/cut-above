@@ -38,7 +38,7 @@ const errorHandler = async (err, req, res, next) => {
     // Abort any open transactions
     await req.session.abortTransaction();
     // End the session
-    req.session.endSession();
+    await req.session.endSession();
   }
   if (err.name === 'JsonWebTokenError') {
     return res.status(401).json({

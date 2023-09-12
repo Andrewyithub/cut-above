@@ -70,9 +70,66 @@ const bookAppointment = async (req, res) => {
   session.endSession();
 };
 
+const modifyAppointment = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  req.session = session;
+  const { date, start, end, service, employee } = req.body;
+  // newAppointmentDetails to format time
+
+  const modifiedAppointment = await Appointment.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    {
+      new: true,
+      runValidators: true,
+      context: 'query',
+      session: session,
+    }
+  );
+  const schedule = await Schedule.findOne({
+    appointments: req.params.id,
+  });
+  const scheduledAppointments = [...schedule.appointments];
+  const updatedAppointmentIndex = scheduledAppointments.findIndex(
+    (appointmentId) => appointmentId.toString() === req.params.id
+  );
+  if (
+    req.body.date &&
+    new Date(req.body.date).getTime() !== new Date(schedule.date).getTime()
+  ) {
+    //  add to new schedule
+    const newSchedule = await Schedule.findOne({ date: req.body.date });
+    newSchedule.appointments.push(modifiedAppointment);
+    await newSchedule.save({ session });
+    //     //  remove from old schedule
+    scheduledAppointments.splice(updatedAppointmentIndex, 1);
+  } else {
+    scheduledAppointments.splice(
+      updatedAppointmentIndex,
+      1,
+      modifiedAppointment
+    );
+  }
+  schedule.appointments = scheduledAppointments;
+  await schedule.save({ session });
+  //   // and then send confirmation email
+  //   console.log('====================================');
+  //   console.log('sending confirmation email');
+  //   console.log('====================================');
+
+  res.status(200).json({
+    success: true,
+    message: 'Appointment successfully updated',
+  });
+  await session.commitTransaction();
+  session.endSession();
+};
+
 // ! async refactor
 // ! also add mongo update method
-const modifyAppointment = async (req, res) => {
+// ! new modify will have a new email sent
+const modifyAppointmentV1 = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
@@ -145,7 +202,7 @@ module.exports = {
   bookAppointment,
   modifyAppointment,
   // createNewAppointment,
-  // updateAppointmentStatus,
+  updateAppointmentStatus,
   cancelAppointment,
 };
 
