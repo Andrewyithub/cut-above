@@ -15,10 +15,7 @@ router
 router
   .route('/:id')
   .get(appointmentRouter.getOneAppointment)
-  .put(
-    // middleware.verifyJWT,
-    appointmentRouter.modifyAppointment
-  )
+  .put(middleware.verifyJWT, appointmentRouter.modifyAppointment)
   .delete(middleware.verifyJWT, appointmentRouter.cancelAppointment);
 
 module.exports = router;

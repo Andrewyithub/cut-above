@@ -75,11 +75,21 @@ const modifyAppointment = async (req, res) => {
   session.startTransaction();
   req.session = session;
   const { date, start, end, service, employee } = req.body;
-  // newAppointmentDetails to format time
-
+  const employeeToBook = await User.findOne({ _id: employee });
+  const formattedDate = dateServices.easternDate(date);
+  const formattedStart = dateServices.easternDateTime(date, start);
+  const emailId = emailServices.generateEmailId();
+  const newAppointmentDetails = {
+    date: formattedDate,
+    start: formattedStart,
+    end: dateServices.easternDateTime(date, end),
+    service,
+    employee: employeeToBook,
+    emailId,
+  };
   const modifiedAppointment = await Appointment.findByIdAndUpdate(
     req.params.id,
-    req.body,
+    newAppointmentDetails,
     {
       new: true,
       runValidators: true,
@@ -87,36 +97,37 @@ const modifyAppointment = async (req, res) => {
       session: session,
     }
   );
-  const schedule = await Schedule.findOne({
+  const prevSchedule = await Schedule.findOne({
     appointments: req.params.id,
   });
-  const scheduledAppointments = [...schedule.appointments];
+  const scheduledAppointments = [...prevSchedule.appointments];
   const updatedAppointmentIndex = scheduledAppointments.findIndex(
     (appointmentId) => appointmentId.toString() === req.params.id
   );
   if (
     req.body.date &&
-    new Date(req.body.date).getTime() !== new Date(schedule.date).getTime()
+    new Date(formattedDate).getTime() !== new Date(prevSchedule.date).getTime()
   ) {
     //  add to new schedule
-    const newSchedule = await Schedule.findOne({ date: req.body.date });
+    const newSchedule = await Schedule.findOne({ date: formattedDate });
     newSchedule.appointments.push(modifiedAppointment);
     await newSchedule.save({ session });
-    //     //  remove from old schedule
+    //  remove from old schedule
     scheduledAppointments.splice(updatedAppointmentIndex, 1);
   } else {
+    // date has not changed, update old schedule's information
     scheduledAppointments.splice(
       updatedAppointmentIndex,
       1,
       modifiedAppointment
     );
   }
-  schedule.appointments = scheduledAppointments;
-  await schedule.save({ session });
-  //   // and then send confirmation email
-  //   console.log('====================================');
-  //   console.log('sending confirmation email');
-  //   console.log('====================================');
+  prevSchedule.appointments = scheduledAppointments;
+  await prevSchedule.save({ session });
+  // and then send confirmation email
+  console.log('====================================');
+  console.log('sending confirmation email');
+  console.log('====================================');
 
   res.status(200).json({
     success: true,
@@ -126,46 +137,6 @@ const modifyAppointment = async (req, res) => {
   session.endSession();
 };
 
-// ! async refactor
-// ! also add mongo update method
-// ! new modify will have a new email sent
-const modifyAppointmentV1 = async (req, res) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
-  try {
-    // const appointment = await Appointment.findById(req.params.id);
-    // if (req.body.status) appointment.status = req.body.status;
-    // await appointment.save({ session });
-    // await session.commitTransaction();
-    // res.status(200).json({
-    //   success: true,
-    //   message: 'Appointment updated',
-    // });
-    const appointment = await Appointment.findById(req.params.id, null, {
-      session,
-    });
-    console.log('====================================');
-    console.log(appointment);
-    console.log('====================================');
-    appointment.status = 'checked-in';
-
-    await appointment.save({ session });
-
-    await session.commitTransaction();
-    res.status(200).json({
-      success: true,
-      message: 'Test worked',
-    });
-  } catch (err) {
-    console.log(err);
-    await session.abortTransaction();
-    throw new AppError(500, 'Failed to update appointment');
-  } finally {
-    session.endSession();
-  }
-};
-
-// ! refactor into one
 const updateAppointmentStatus = async (req, res) => {
   const updatedAppointment = await Appointment.updateOne(
     { _id: req.params.id },
