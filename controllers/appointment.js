@@ -33,9 +33,6 @@ const bookAppointment = async (req, res) => {
   const client = await User.findOne({ _id: req.user });
   const employeeToBook = await User.findOne({ _id: employee });
   const formattedData = databaseServices.formatData(date, start, end);
-  // const emailId = emailServices.generateEmailId();
-  // const formattedStart = dateServices.easternDateTime(date, start);
-  // const formattedDate = dateServices.easternDate(date);
   const newAppt = new Appointment({
     date: formattedData.date,
     start: formattedData.start,
@@ -86,16 +83,15 @@ const modifyAppointment = async (req, res) => {
   // modify existing appointment
   const { date, start, end, service, employee } = req.body;
   const employeeToBook = await User.findOne({ _id: employee });
-  const formattedDate = dateServices.easternDate(date);
-  const formattedStart = dateServices.easternDateTime(date, start);
-  const emailId = emailServices.generateEmailId();
+  const formattedData = databaseServices.formatData(date, start, end);
+
   const newAppointmentDetails = {
-    date: formattedDate,
-    start: formattedStart,
-    end: dateServices.easternDateTime(date, end),
+    date: formattedData.date,
+    start: formattedData.start,
+    end: formattedData.end,
     service,
     employee: employeeToBook,
-    emailId,
+    emailId: formattedData.emailId,
   };
 
   // validate date availability
@@ -122,10 +118,11 @@ const modifyAppointment = async (req, res) => {
   );
   if (
     req.body.date &&
-    new Date(formattedDate).getTime() !== new Date(prevSchedule.date).getTime()
+    new Date(formattedData.date).getTime() !==
+      new Date(prevSchedule.date).getTime()
   ) {
     //  add to new schedule
-    const newSchedule = await Schedule.findOne({ date: formattedDate });
+    const newSchedule = await Schedule.findOne({ date: formattedData.date });
     newSchedule.appointments.push(modifiedAppointment);
     await newSchedule.save({ session });
     //  remove from old schedule
