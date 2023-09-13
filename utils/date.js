@@ -17,7 +17,7 @@ const checkAvailability = (schedule, newAppt) => {
   for (let appt of schedule.appointments) {
     const start = dayjs(appt.start);
     const end = dayjs(appt.end);
-    if (appt.employee.toString() === newAppt.employee.toString()) {
+    if (appt.employee.toString() === newAppt.employee._id.toString()) {
       if (
         newStart.isBetween(start, end, 'time', '[)') ||
         newEnd.isBetween(start, end, 'time', '(]')
