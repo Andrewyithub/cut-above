@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Appointment = require('../models/Appointment');
 const Schedule = require('../models/Schedule');
 const User = require('../models/User');
+const databaseServices = require('../utils/database');
 const dateServices = require('../utils/date');
 const emailServices = require('../utils/email');
 const AppError = require('../utils/AppError');
@@ -26,33 +27,39 @@ const bookAppointment = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   req.session = session;
+
   // Create new appointment
   const { date, start, end, service, employee } = req.body;
   const client = await User.findOne({ _id: req.user });
   const employeeToBook = await User.findOne({ _id: employee });
-  const emailId = emailServices.generateEmailId();
-  const formattedStart = dateServices.easternDateTime(date, start);
+  const formattedData = databaseServices.formatData(date, start, end);
+  // const emailId = emailServices.generateEmailId();
+  // const formattedStart = dateServices.easternDateTime(date, start);
+  // const formattedDate = dateServices.easternDate(date);
   const newAppt = new Appointment({
-    date: dateServices.easternDate(date),
-    start: formattedStart,
-    end: dateServices.easternDateTime(date, end),
+    date: formattedData.date,
+    start: formattedData.start,
+    end: formattedData.end,
     service,
     client,
     employee: employeeToBook,
-    emailId,
+    emailId: formattedData.emailId,
   });
+
   // Validate availability
   const schedule = await Schedule.findOne({
-    date: dateServices.easternDate(date),
+    date: formattedData.date,
   }).populate('appointments', 'start end employee');
   const open = dateServices.checkAvailability(schedule, newAppt);
   if (!open) {
     throw new AppError(500, 'Time slot no longer available');
   }
   await newAppt.save({ session });
+
   // Add to schedule
   schedule.appointments.push(newAppt);
   await schedule.save({ session });
+
   // Send confirmation
   // const emailSent = await emailServices.sendEmail({
   //   receiver: client.email,
@@ -62,6 +69,7 @@ const bookAppointment = async (req, res) => {
   //   option: 'confirmation',
   //   emailLink: `https://cutaboveshop.fly.dev/appointment/${emailId}`,
   // });
+
   await session.commitTransaction();
   res.status(201).json({
     success: true,
@@ -74,6 +82,8 @@ const modifyAppointment = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   req.session = session;
+
+  // modify existing appointment
   const { date, start, end, service, employee } = req.body;
   const employeeToBook = await User.findOne({ _id: employee });
   const formattedDate = dateServices.easternDate(date);
@@ -87,6 +97,10 @@ const modifyAppointment = async (req, res) => {
     employee: employeeToBook,
     emailId,
   };
+
+  // validate date availability
+  // ...
+
   const modifiedAppointment = await Appointment.findByIdAndUpdate(
     req.params.id,
     newAppointmentDetails,
@@ -97,6 +111,8 @@ const modifyAppointment = async (req, res) => {
       session: session,
     }
   );
+
+  // add modified appointment to schedule
   const prevSchedule = await Schedule.findOne({
     appointments: req.params.id,
   });
@@ -124,7 +140,8 @@ const modifyAppointment = async (req, res) => {
   }
   prevSchedule.appointments = scheduledAppointments;
   await prevSchedule.save({ session });
-  // and then send confirmation email
+
+  // send confirmation email
   console.log('====================================');
   console.log('sending confirmation email');
   console.log('====================================');
