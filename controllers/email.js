@@ -1,6 +1,6 @@
-const email = require('../utils/email');
-const User = require('../models/User');
-const jwt = require('jsonwebtoken');
+const email = require("../utils/email");
+const User = require("../models/User");
+const jwt = require("jsonwebtoken");
 
 const handleConfirmation = async (req, res) => {
   const { employee, date, time, emailId } = req.body;
@@ -11,10 +11,10 @@ const handleConfirmation = async (req, res) => {
     employee: bookedEmployee.firstName,
     date,
     time,
-    option: 'confirmation',
+    option: "confirmation",
     emailLink: `https://cutaboveshop.fly.dev/appointment/${emailId}`,
   });
-  res.status(200).json({ success: true, message: 'Confirmation email sent' });
+  res.status(200).json({ success: true, message: "Confirmation email sent" });
 };
 
 const handleModification = async (req, res) => {
@@ -26,10 +26,10 @@ const handleModification = async (req, res) => {
     employee: bookedEmployee.firstName,
     date,
     time,
-    option: 'modification',
+    option: "modification",
     emailLink: `https://cutaboveshop.fly.dev/appointment/${emailId}`,
   });
-  res.status(200).json({ success: true, message: 'Modification email sent' });
+  res.status(200).json({ success: true, message: "Modification email sent" });
 };
 
 const handleCancellation = async (req, res) => {
@@ -41,9 +41,9 @@ const handleCancellation = async (req, res) => {
     employee: cancelledEmployee.firstName,
     date,
     time,
-    option: 'cancellation',
+    option: "cancellation",
   });
-  res.status(200).json({ success: true, message: 'Cancellation email sent' });
+  res.status(200).json({ success: true, message: "Cancellation email sent" });
 };
 
 const handlePasswordReset = async (req, res) => {
@@ -54,19 +54,19 @@ const handlePasswordReset = async (req, res) => {
       id: resetPasswordId,
     },
     process.env.RESET_TOKEN_SECRET,
-    { expiresIn: '1h' }
+    { expiresIn: "1h" },
   );
   user.emailToken.push(resetPasswordId);
   await user.save();
   const emailSent = await email.sendEmail({
     receiver: user.email,
-    option: 'reset password',
+    option: "reset password",
     emailLink: `https://cutaboveshop.fly.dev/resetpw/?token=${resetToken}`,
   });
   res.status(200).json({
     success: true,
     message:
-      'If an user exists with this email, an email with reset instructions has been sent.',
+      "If an user exists with this email, an email with reset instructions has been sent.",
   });
 };
 
