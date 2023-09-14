@@ -24,14 +24,15 @@ app.use(express.static('dist'));
 app.use(express.json());
 app.use(cookieParser());
 
-app.use('/auth', require('./routes/auth'));
+app.use(middleware.requestLogger);
 app.use('/api/employee', require('./routes/employee'));
+app.use('/api/schedule', require('./routes/schedule'));
+app.use('/api/appointment', require('./routes/appointment'));
+app.use('/auth', require('./routes/auth'));
 app.use('/logout', require('./routes/logout'));
 app.use('/refresh', require('./routes/refreshToken'));
 app.use('/signup', require('./routes/register'));
-app.use('/api/schedule', require('./routes/schedule'));
-app.use('/api/appointment', require('./routes/appointment'));
-app.use('/api/email/', require('./routes/email'));
+app.use('/api/email', require('./routes/email'));
 app.use('/api/user', require('./routes/user'));
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));

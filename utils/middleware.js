@@ -14,13 +14,31 @@ const requestLogger = (req, res, next) => {
 };
 
 const verifyJWT = (req, res, next) => {
+  console.log('====================================');
+  console.log('emailToken', req.body.emailToken);
+  console.log('====================================');
   const authHeader = req.headers.authorization || req.headers.Authorization;
-  if (!authHeader?.startsWith('Bearer ')) {
+  console.log('====================================');
+  console.log('authHeader', authHeader);
+  console.log('====================================');
+  if (!authHeader?.startsWith('Bearer ') && !req.body.emailToken) {
     // return res.sendStatus(401);
     throw new AppError(401, 'Unauthorized');
   }
-  const token = authHeader.split(' ')[1];
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+  const token = authHeader ? authHeader.split(' ')[1] : req.body.emailToken;
+  console.log('====================================');
+  console.log('token', token);
+  console.log('====================================');
+  let secret;
+
+  if (req.path === '/api/users/resetpw') {
+    secret = process.env.RESET_TOKEN_SECRET;
+  } else if (req.body.emailToken) {
+    secret = process.env.EMAIL_TOKEN_SECRET;
+  } else {
+    secret = process.env.ACCESS_TOKEN_SECRET;
+  }
+  jwt.verify(token, secret, (err, decoded) => {
     if (err) {
       // return res.sendStatus(403); //invalid token
       next(err);

@@ -1,14 +1,14 @@
-const mongoose = require("mongoose");
-const Appointment = require("../models/Appointment");
-const Schedule = require("../models/Schedule");
-const User = require("../models/User");
-const databaseServices = require("../utils/database");
-const dateServices = require("../utils/date");
-const emailServices = require("../utils/email");
-const AppError = require("../utils/AppError");
+const mongoose = require('mongoose');
+const Appointment = require('../models/Appointment');
+const Schedule = require('../models/Schedule');
+const User = require('../models/User');
+const databaseServices = require('../utils/database');
+const dateServices = require('../utils/date');
+const emailServices = require('../utils/email');
+const AppError = require('../utils/AppError');
 
-const jwt = require("jsonwebtoken");
-const dayjs = require("dayjs");
+const jwt = require('jsonwebtoken');
+const dayjs = require('dayjs');
 
 const getAllAppointments = async (req, res) => {
   const appointments = await Appointment.find({
@@ -49,10 +49,10 @@ const bookAppointment = async (req, res) => {
   // Validate availability
   const schedule = await Schedule.findOne({
     date: formattedData.date,
-  }).populate("appointments", "start end employee");
+  }).populate('appointments', 'start end employee');
   const open = dateServices.checkAvailability(schedule, newAppt);
   if (!open) {
-    throw new AppError(500, "Time slot no longer available");
+    throw new AppError(500, 'Time slot no longer available');
   }
   await newAppt.save({ session });
 
@@ -64,31 +64,33 @@ const bookAppointment = async (req, res) => {
   const appointmentDateTime = dayjs(formattedData.date);
 
   // Calculate expiration date
-  const expirationDateTime = appointmentDateTime.subtract(2, "day");
+  const expirationDateTime = appointmentDateTime.subtract(2, 'day');
+  const expiresInSec = dayjs().diff(expirationDateTime, 'second');
+
   const userEmailToken = jwt.sign(
     {
       id: client._id,
     },
     process.env.EMAIL_TOKEN_SECRET,
-    { expiresIn: expirationDateTime },
+    { expiresIn: expiresInSec }
   );
   client.emailToken.push(userEmailToken);
   await client.save({ session });
 
   // Sending confirmation
-  // const emailSent = await emailServices.sendEmail({
-  //   receiver: client.email,
-  //   employee: employeeToBook.firstName,
-  //   date: dateServices.formatDateSlash(formattedData.data),
-  //   time: dateServices.formatTime(formattedData.start),
-  //   option: 'confirmation',
-  //   emailLink: `https://cutaboveshop.fly.dev/appointment/${emailId}/?token=${userEmailToken}`,
-  // });
+  const emailSent = await emailServices.sendEmail({
+    receiver: client.email,
+    employee: employeeToBook.firstName,
+    date: dateServices.formatDateSlash(formattedData.data),
+    time: dateServices.formatTime(formattedData.start),
+    option: 'confirmation',
+    emailLink: `https://cutaboveshop.fly.dev/appointment/${formattedData.emailId}/?token=${userEmailToken}`,
+  });
 
   await session.commitTransaction();
   res.status(201).json({
     success: true,
-    message: "Appointment booked successfully",
+    message: 'Appointment booked successfully',
   });
   session.endSession();
 };
@@ -115,13 +117,13 @@ const modifyAppointment = async (req, res) => {
   // validate date availability
   const newSchedule = await Schedule.findOne({
     date: formattedData.date,
-  }).populate("appointments", "start end employee");
+  }).populate('appointments', 'start end employee');
   const open = dateServices.checkAvailability(
     newSchedule,
-    newAppointmentDetails,
+    newAppointmentDetails
   );
   if (!open) {
-    throw new AppError(500, "Time slot no longer available");
+    throw new AppError(500, 'Time slot no longer available');
   }
   const modifiedAppointment = await Appointment.findByIdAndUpdate(
     req.params.id,
@@ -129,9 +131,9 @@ const modifyAppointment = async (req, res) => {
     {
       new: true,
       runValidators: true,
-      context: "query",
+      context: 'query',
       session: session,
-    },
+    }
   );
 
   // add modified appointment to schedule
@@ -140,7 +142,7 @@ const modifyAppointment = async (req, res) => {
   });
   const scheduledAppointments = [...prevSchedule.appointments];
   const updatedAppointmentIndex = scheduledAppointments.findIndex(
-    (appointmentId) => appointmentId.toString() === req.params.id,
+    (appointmentId) => appointmentId.toString() === req.params.id
   );
   if (
     req.body.date &&
@@ -157,20 +159,20 @@ const modifyAppointment = async (req, res) => {
     scheduledAppointments.splice(
       updatedAppointmentIndex,
       1,
-      modifiedAppointment,
+      modifiedAppointment
     );
   }
   prevSchedule.appointments = scheduledAppointments;
   await prevSchedule.save({ session });
 
   // send confirmation email
-  console.log("====================================");
-  console.log("sending confirmation email");
-  console.log("====================================");
+  console.log('====================================');
+  console.log('sending confirmation email');
+  console.log('====================================');
 
   res.status(200).json({
     success: true,
-    message: "Appointment successfully updated",
+    message: 'Appointment successfully updated',
   });
   await session.commitTransaction();
   session.endSession();
@@ -179,22 +181,22 @@ const modifyAppointment = async (req, res) => {
 const updateAppointmentStatus = async (req, res) => {
   const updatedAppointment = await Appointment.updateOne(
     { _id: req.params.id },
-    { $set: { status: req.body.status } },
+    { $set: { status: req.body.status } }
   );
   res.status(200).json({
     success: true,
-    message: "Appointment successfully updated",
+    message: 'Appointment successfully updated',
     data: updatedAppointment,
   });
 };
 
 const cancelAppointment = async (req, res) => {
   const { date, employee, start } = await Appointment.findByIdAndDelete(
-    req.params.id,
+    req.params.id
   );
   const scheduleToUpdate = await Schedule.findOne({ date });
   const index = scheduleToUpdate.appointments.findIndex(
-    (appt) => appt._id.toString() === req.params.id,
+    (appt) => appt._id.toString() === req.params.id
   );
   scheduleToUpdate.appointments.splice(index, 1);
   await scheduleToUpdate.save();
@@ -202,7 +204,7 @@ const cancelAppointment = async (req, res) => {
   res.status(200).json({
     success: true,
     data: { date, employee, start },
-    message: "Appointment successfully cancelled",
+    message: 'Appointment successfully cancelled',
   });
 };
 

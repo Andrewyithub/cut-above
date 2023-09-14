@@ -66,10 +66,13 @@ const removeResetToken = async (resetPasswordId) => {
 };
 
 const validateToken = async (req, res) => {
-  const { token } = req.params;
+  const { token } = req.params || req.user;
+  console.log('====================================');
+  console.log('validating token: ', token);
+  console.log('====================================');
   let decoded;
   try {
-    decoded = jwt.verify(token, process.env.RESET_TOKEN_SECRET);
+    decoded = jwt.verify(token, process.env.EMAIL_TOKEN_SECRET);
   } catch (err) {
     decoded = jwt.decode(token);
     const { id: resetPasswordId } = decoded;
