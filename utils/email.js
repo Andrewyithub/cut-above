@@ -43,9 +43,6 @@ const sendEmail = async ({
   option,
   emailLink,
 }) => {
-  console.log('====================================');
-  console.log('sendEmail received');
-  console.log('====================================');
   const transporter = nodemailer.createTransport({
     service: config.EMAIL_SERVICE,
     auth: {

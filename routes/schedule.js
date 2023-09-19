@@ -3,7 +3,6 @@ const router = express.Router();
 const scheduleRouter = require('../controllers/schedule');
 const middleware = require('../utils/middleware');
 
-// TODO: verify roles middleware
 router
   .route('/')
   .get(scheduleRouter.getAllSchedules)

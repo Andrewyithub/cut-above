@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const AppError = require('../utils/AppError');
 
 const getAllUsers = async (req, res) => {
   const users = await User.find({});
@@ -57,26 +58,29 @@ const removeUserData = async (req, res) => {
   });
 };
 
-const removeResetToken = async (resetPasswordId) => {
-  const user = await User.findOne({ emailToken: resetPasswordId });
+const removeEmailToken = async (emailId) => {
+  const user = await User.findOne({ emailToken: emailId });
   if (user) {
-    user.emailToken = user.emailToken.filter((id) => id !== resetPasswordId);
+    user.emailToken = user.emailToken.filter((id) => id !== emailId);
     await user.save();
   }
 };
 
 const validateToken = async (req, res) => {
-  const { token } = req.params || req.user;
-  console.log('====================================');
-  console.log('validating token: ', token);
-  console.log('====================================');
+  const { token, option } = req.params;
   let decoded;
+  let secret;
+  if (option === 'reset') {
+    secret = process.env.RESET_TOKEN_SECRET;
+  } else if (option === 'email') {
+    secret = process.env.EMAIL_TOKEN_SECRET;
+  }
   try {
-    decoded = jwt.verify(token, process.env.EMAIL_TOKEN_SECRET);
+    decoded = jwt.verify(token, secret);
   } catch (err) {
     decoded = jwt.decode(token);
-    const { id: resetPasswordId } = decoded;
-    removeResetToken(resetPasswordId);
+    const { id: emailId } = decoded;
+    removeEmailToken(emailId);
     return res.status(400).json({ error: 'Expired token' });
   }
   res.status(200).json({ message: 'Token is valid' });
@@ -89,8 +93,8 @@ const resetPassword = async (req, res) => {
     decoded = jwt.verify(token, process.env.RESET_TOKEN_SECRET);
   } catch (err) {
     decoded = jwt.decode(token);
-    removeResetToken(decoded.id);
-    return res.status(400).json({ error: 'Expired token' });
+    removeEmailToken(decoded.id);
+    throw new AppError(400, 'Expired token, request another reset');
   }
   const user = await User.findOne({ emailToken: decoded.id });
   if (!user) {

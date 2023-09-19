@@ -4,7 +4,7 @@ const AppError = require('./AppError');
 
 const requestLogger = (req, res, next) => {
   // prevents logging of user information
-  if (req.path !== '/login') {
+  if (req.path !== '/auth') {
     logger.info('Method:', req.method);
     logger.info('Path:  ', req.path);
     logger.info('Body:  ', req.body);
@@ -14,24 +14,15 @@ const requestLogger = (req, res, next) => {
 };
 
 const verifyJWT = (req, res, next) => {
-  console.log('====================================');
-  console.log('emailToken', req.body.emailToken);
-  console.log('====================================');
   const authHeader = req.headers.authorization || req.headers.Authorization;
-  console.log('====================================');
-  console.log('authHeader', authHeader);
-  console.log('====================================');
   if (!authHeader?.startsWith('Bearer ') && !req.body.emailToken) {
     // return res.sendStatus(401);
     throw new AppError(401, 'Unauthorized');
   }
   const token = authHeader ? authHeader.split(' ')[1] : req.body.emailToken;
-  console.log('====================================');
-  console.log('token', token);
-  console.log('====================================');
   let secret;
 
-  if (req.path === '/api/users/resetpw') {
+  if (req.path === '/api/user/resetpw') {
     secret = process.env.RESET_TOKEN_SECRET;
   } else if (req.body.emailToken) {
     secret = process.env.EMAIL_TOKEN_SECRET;
@@ -43,6 +34,7 @@ const verifyJWT = (req, res, next) => {
       // return res.sendStatus(403); //invalid token
       next(err);
     }
+    // reset and email decodes into user's emailToken
     req.user = decoded.id;
     next();
   });
