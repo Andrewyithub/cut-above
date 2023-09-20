@@ -12,14 +12,8 @@ const formatData = (date, start, end) => {
 };
 
 const removeEmailToken = async (emailId) => {
-  console.log('====================================');
-  console.log('emailId', emailId);
-  console.log('====================================');
   const user = await User.findOne({ emailToken: emailId });
   if (user) {
-    console.log('====================================');
-    console.log('user found: ', user);
-    console.log('====================================');
     user.emailToken = user.emailToken.filter((id) => id !== emailId);
     await user.save();
   }

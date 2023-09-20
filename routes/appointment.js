@@ -20,6 +20,10 @@ router
     middleware.handleEmailTokenError,
     appointmentRouter.modifyAppointment
   )
-  .delete(middleware.verifyJWT, appointmentRouter.cancelAppointment);
+  .delete(
+    middleware.verifyJWT,
+    middleware.handleEmailTokenError,
+    appointmentRouter.cancelAppointment
+  );
 
 module.exports = router;

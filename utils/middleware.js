@@ -1,7 +1,7 @@
 const logger = require('./logger');
 const jwt = require('jsonwebtoken');
 const AppError = require('./AppError');
-const databaseServices = require('../utils/database');
+const databaseServices = require('./database');
 
 const requestLogger = (req, res, next) => {
   // prevents logging of user information
@@ -38,15 +38,21 @@ const verifyJWT = (req, res, next) => {
   }
   try {
     decoded = jwt.verify(token, secret);
+    console.log('====================================');
+    console.log('successfully decoded', decoded);
+    console.log('====================================');
   } catch (err) {
     decoded = jwt.decode(token);
     console.log('====================================');
     console.log('middleware: ', decoded);
     console.log('====================================');
-    req.decoded = decoded;
-    next(err, decoded);
+    req.decoded = decoded.id;
+    next(err);
   }
   if (source === 'reset' || source === 'email') {
+    console.log('====================================');
+    console.log('email', decoded.id);
+    console.log('====================================');
     req.emailId = decoded.id;
     next();
   }
@@ -65,17 +71,18 @@ const verifyJWT = (req, res, next) => {
   // });
 };
 
-const handleEmailTokenError = async (err, req, res, next) => {
+const handleEmailTokenError = (err, req, res, next) => {
   if (err) {
     console.log('====================================');
-    console.log('handling emailTokenError: ', err);
+    console.log('erring', err);
     console.log('====================================');
-    console.log('====================================');
-    console.log('decoded', req.decoded);
-    console.log('====================================');
-    await databaseServices.removeEmailToken(decoded.id);
+    databaseServices.removeEmailToken(req.decoded);
+    next(err);
   }
-  next(err);
+  console.log('====================================');
+  console.log('no err move along');
+  console.log('====================================');
+  next();
 };
 
 const errorHandler = async (err, req, res, next) => {

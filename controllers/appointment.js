@@ -65,15 +65,18 @@ const bookAppointment = async (req, res) => {
 
   // Calculate expiration date
   const expirationDateTime = appointmentDateTime.subtract(2, 'day');
-  const expiresInSec = dayjs().diff(expirationDateTime, 'second');
+  const expiresInSec = expirationDateTime.diff(dayjs(), 'second');
 
+  console.log('====================================');
+  console.log('expiresInSec', expiresInSec);
+  console.log('====================================');
   const emailId = emailServices.generateEmailId();
   const userEmailToken = jwt.sign(
     {
       id: emailId,
     },
     process.env.EMAIL_TOKEN_SECRET,
-    { expiresIn: '1m' }
+    { expiresIn: expiresInSec }
   );
   client.emailToken.push(emailId);
   await client.save({ session });
@@ -183,7 +186,7 @@ const modifyAppointment = async (req, res) => {
   const appointmentDateTime = dayjs(formattedData.date);
 
   const expirationDateTime = appointmentDateTime.subtract(2, 'day');
-  const expiresInSec = dayjs().diff(expirationDateTime, 'second');
+  const expiresInSec = expirationDateTime.diff(dayjs(), 'second');
 
   // Creating user email token
   const newEmailId = emailServices.generateEmailId();
@@ -198,9 +201,6 @@ const modifyAppointment = async (req, res) => {
   await client.save({ session });
 
   // send confirmation email
-  console.log('====================================');
-  console.log('date test:', formattedData.date);
-  console.log('====================================');
   const emailSent = await emailServices.sendEmail({
     receiver: client.email,
     employee: employeeToBook.firstName,
@@ -231,8 +231,11 @@ const updateAppointmentStatus = async (req, res) => {
 };
 
 const cancelAppointment = async (req, res) => {
-  if (req.body.token) {
-    const user = await User.findOne({ _id: req.user });
+  if (req.emailId) {
+    console.log('====================================');
+    console.log('cancel controller', req.emailId);
+    console.log('====================================');
+    databaseServices.removeEmailToken(req.emailId);
   }
   const { date, employee, start } = await Appointment.findByIdAndDelete(
     req.params.id
