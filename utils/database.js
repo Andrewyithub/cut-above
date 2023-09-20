@@ -1,5 +1,6 @@
 const dateServices = require('./date');
 const emailServices = require('./email');
+const User = require('../models/User');
 
 const formatData = (date, start, end) => {
   return {
@@ -10,4 +11,18 @@ const formatData = (date, start, end) => {
   };
 };
 
-module.exports = { formatData };
+const removeEmailToken = async (emailId) => {
+  console.log('====================================');
+  console.log('emailId', emailId);
+  console.log('====================================');
+  const user = await User.findOne({ emailToken: emailId });
+  if (user) {
+    console.log('====================================');
+    console.log('user found: ', user);
+    console.log('====================================');
+    user.emailToken = user.emailToken.filter((id) => id !== emailId);
+    await user.save();
+  }
+};
+
+module.exports = { formatData, removeEmailToken };

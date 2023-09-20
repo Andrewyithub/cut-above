@@ -67,24 +67,26 @@ const bookAppointment = async (req, res) => {
   const expirationDateTime = appointmentDateTime.subtract(2, 'day');
   const expiresInSec = dayjs().diff(expirationDateTime, 'second');
 
+  const emailId = emailServices.generateEmailId();
   const userEmailToken = jwt.sign(
     {
-      id: client._id,
+      id: emailId,
     },
     process.env.EMAIL_TOKEN_SECRET,
-    { expiresIn: expiresInSec }
+    { expiresIn: '1m' }
   );
-  client.emailToken.push(userEmailToken);
+  client.emailToken.push(emailId);
   await client.save({ session });
 
   // Sending confirmation
   const emailSent = await emailServices.sendEmail({
     receiver: client.email,
     employee: employeeToBook.firstName,
-    date: dateServices.formatDateSlash(formattedData.data),
+    date: dateServices.formatDateSlash(formattedData.date),
     time: dateServices.formatTime(formattedData.start),
     option: 'confirmation',
-    emailLink: `https://cutaboveshop.fly.dev/appointment/${formattedData.emailId}/?token=${userEmailToken}`,
+    emailLink: `http://localhost:3000/appointment/${formattedData.emailId}/?token=${userEmailToken}`,
+    // emailLink: `https://cutaboveshop.fly.dev/appointment/${formattedData.emailId}/?token=${userEmailToken}`,
   });
 
   await session.commitTransaction();
@@ -166,13 +168,17 @@ const modifyAppointment = async (req, res) => {
   await prevSchedule.save({ session });
 
   // Handling used and creating new token
-  const client = await User.findOne({ _id: modifiedAppointment.client });
-  if (req.body.emailToken) {
-    // if emailToken used, remove decoded token that is req.user from middleware
-    client.emailToken = client.emailToken.filter(
-      (token) => token !== req.body.emailToken
-    );
+  let client;
+  if (req.emailId) {
+    client.emailToken = client.emailToken.filter((id) => id !== req.emailId);
+  } else {
+    // ! Change this if admin modifying
+    client = await User.findOne({ _id: req.user });
   }
+  if (!client) {
+    throw new AppError(500, 'Something went wrong');
+  }
+  // create expiration
   // Calculate new token expiration date
   const appointmentDateTime = dayjs(formattedData.date);
 
@@ -180,21 +186,25 @@ const modifyAppointment = async (req, res) => {
   const expiresInSec = dayjs().diff(expirationDateTime, 'second');
 
   // Creating user email token
+  const newEmailId = emailServices.generateEmailId();
   const userEmailToken = jwt.sign(
     {
-      id: client._id,
+      id: newEmailId,
     },
     process.env.EMAIL_TOKEN_SECRET,
     { expiresIn: expiresInSec }
   );
-  client.emailToken.push(userEmailToken);
+  client.emailToken.push(newEmailId);
   await client.save({ session });
 
   // send confirmation email
+  console.log('====================================');
+  console.log('date test:', formattedData.date);
+  console.log('====================================');
   const emailSent = await emailServices.sendEmail({
     receiver: client.email,
     employee: employeeToBook.firstName,
-    date: dateServices.formatDateSlash(formattedData.data),
+    date: dateServices.formatDateSlash(formattedData.date),
     time: dateServices.formatTime(formattedData.start),
     option: 'modification',
     emailLink: `https://cutaboveshop.fly.dev/appointment/${formattedData.emailId}/?token=${userEmailToken}`,

@@ -81,7 +81,8 @@ const validateToken = async (req, res) => {
     decoded = jwt.decode(token);
     const { id: emailId } = decoded;
     removeEmailToken(emailId);
-    return res.status(400).json({ error: 'Expired token' });
+    throw new AppError(400, 'Expired token');
+    // return res.status(400).json({ error: 'Expired token' });
   }
   res.status(200).json({ message: 'Token is valid' });
 };

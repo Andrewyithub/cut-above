@@ -48,20 +48,21 @@ const handleCancellation = async (req, res) => {
 
 const handlePasswordReset = async (req, res) => {
   const user = await User.findOne({ email: req.body.email });
+  // ! Handle no user
   const emailId = email.generateEmailId();
-  const emailToken = jwt.sign(
+  const resetEmailToken = jwt.sign(
     {
       id: emailId,
     },
     process.env.RESET_TOKEN_SECRET,
-    { expiresIn: '30s' }
+    { expiresIn: '1h' }
   );
   user.emailToken.push(emailId);
   await user.save();
   const emailSent = await email.sendEmail({
     receiver: user.email,
     option: 'reset password',
-    emailLink: `http://localhost:3000/resetpw/?token=${emailToken}`,
+    emailLink: `http://localhost:3000/resetpw/?token=${resetEmailToken}`,
     // emailLink: `https://cutaboveshop.fly.dev/resetpw/?token=${emailToken}`,
   });
   res.status(200).json({
