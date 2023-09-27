@@ -1,6 +1,7 @@
 const email = require('../utils/email');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const config = require('../config/config');
 
 const handleConfirmation = async (req, res) => {
   const { employee, date, time, emailId } = req.body;
@@ -12,7 +13,7 @@ const handleConfirmation = async (req, res) => {
     date,
     time,
     option: 'confirmation',
-    emailLink: `https://cutaboveshop.fly.dev/appointment/${emailId}`,
+    emailLink: `${config.CLIENT_URL}/appointment/${emailId}`,
   });
   res.status(200).json({ success: true, message: 'Confirmation email sent' });
 };
@@ -27,7 +28,7 @@ const handleModification = async (req, res) => {
     date,
     time,
     option: 'modification',
-    emailLink: `https://cutaboveshop.fly.dev/appointment/${emailId}`,
+    emailLink: `${config.CLIENT_URL}/appointment/${emailId}`,
   });
   res.status(200).json({ success: true, message: 'Modification email sent' });
 };
@@ -62,8 +63,7 @@ const handlePasswordReset = async (req, res) => {
   const emailSent = await email.sendEmail({
     receiver: user.email,
     option: 'reset password',
-    emailLink: `http://localhost:3000/resetpw/?token=${resetEmailToken}`,
-    // emailLink: `https://cutaboveshop.fly.dev/resetpw/?token=${emailToken}`,
+    emailLink: `${config.CLIENT_URL}/resetpw/?token=${emailToken}`,
   });
   res.status(200).json({
     success: true,

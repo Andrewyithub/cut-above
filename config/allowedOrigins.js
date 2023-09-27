@@ -1,6 +1,4 @@
-const allowedOrigins = [
-  'http://localhost:3000',
-  'https://cutaboveshop.fly.dev',
-];
+const config = require('./config');
+const allowedOrigins = [config.CLIENT_URL];
 
 module.exports = allowedOrigins;

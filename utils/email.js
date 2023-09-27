@@ -11,11 +11,11 @@ const options = (employee, date, time, option, emailLink) => {
   const templates = {
     confirmation: {
       subject: `Your booking at Cut Above Barbershop:`, // Subject line
-      text: `Thank you for booking with us. You are confirmed for an appointment on ${date} at ${time} with ${employee}. If you need to modify or cancel your appointment, please log into your account on https://cutaboveshop.fly.dev or use this link: ${emailLink}`, // plain text body
+      text: `Thank you for booking with us. You are confirmed for an appointment on ${date} at ${time} with ${employee}. If you need to modify or cancel your appointment, please log into your account on ${config.CLIENT_URL} or use this link: ${emailLink}`, // plain text body
     },
     modification: {
       subject: `Booking with Cut Above Barbershop has changed.`, // Subject line
-      text: `Your original booking has been changed. You are now confirmed for an appointment on ${date} at ${time} with ${employee}. If you need to modify or cancel your appointment, please log into your account on https://cutaboveshop.fly.dev or use this link: ${emailLink}`, // plain text body
+      text: `Your original booking has been changed. You are now confirmed for an appointment on ${date} at ${time} with ${employee}. If you need to modify or cancel your appointment, please log into your account on ${config.CLIENT_URL} or use this link: ${emailLink}`, // plain text body
     },
     cancellation: {
       subject: `Booking with Cut Above Barbershop has cancelled.`, // Subject line

@@ -6,6 +6,7 @@ const databaseServices = require('../utils/database');
 const dateServices = require('../utils/date');
 const emailServices = require('../utils/email');
 const AppError = require('../utils/AppError');
+const config = require('../config/config');
 
 const jwt = require('jsonwebtoken');
 const dayjs = require('dayjs');
@@ -67,9 +68,6 @@ const bookAppointment = async (req, res) => {
   const expirationDateTime = appointmentDateTime.subtract(2, 'day');
   const expiresInSec = expirationDateTime.diff(dayjs(), 'second');
 
-  console.log('====================================');
-  console.log('expiresInSec', expiresInSec);
-  console.log('====================================');
   const emailId = emailServices.generateEmailId();
   const userEmailToken = jwt.sign(
     {
@@ -88,8 +86,7 @@ const bookAppointment = async (req, res) => {
     date: dateServices.formatDateSlash(formattedData.date),
     time: dateServices.formatTime(formattedData.start),
     option: 'confirmation',
-    emailLink: `http://localhost:3000/appointment/${formattedData.emailId}/?token=${userEmailToken}`,
-    // emailLink: `https://cutaboveshop.fly.dev/appointment/${formattedData.emailId}/?token=${userEmailToken}`,
+    emailLink: `${config.CLIENT_URL}/appointment/${formattedData.emailId}/?token=${userEmailToken}`,
   });
 
   await session.commitTransaction();
@@ -173,6 +170,7 @@ const modifyAppointment = async (req, res) => {
   // Handling used and creating new token
   let client;
   if (req.emailId) {
+    client = await User.findOne({ emailToken: req.emailId });
     client.emailToken = client.emailToken.filter((id) => id !== req.emailId);
   } else {
     // ! Change this if admin modifying
@@ -207,7 +205,7 @@ const modifyAppointment = async (req, res) => {
     date: dateServices.formatDateSlash(formattedData.date),
     time: dateServices.formatTime(formattedData.start),
     option: 'modification',
-    emailLink: `https://cutaboveshop.fly.dev/appointment/${formattedData.emailId}/?token=${userEmailToken}`,
+    emailLink: `${config.CLIENT_URL}/appointment/${formattedData.emailId}/?token=${userEmailToken}`,
   });
 
   res.status(200).json({
@@ -232,9 +230,6 @@ const updateAppointmentStatus = async (req, res) => {
 
 const cancelAppointment = async (req, res) => {
   if (req.emailId) {
-    console.log('====================================');
-    console.log('cancel controller', req.emailId);
-    console.log('====================================');
     databaseServices.removeEmailToken(req.emailId);
   }
   const { date, employee, start } = await Appointment.findByIdAndDelete(

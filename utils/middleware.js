@@ -21,9 +21,6 @@ const verifyJWT = (req, res, next) => {
     throw new AppError(401, 'Unauthorized');
   }
   const token = authHeader ? authHeader.split(' ')[1] : req.body.emailToken;
-  console.log('====================================');
-  console.log('token middleware: ', token);
-  console.log('====================================');
   let secret;
   let source;
   if (req.path === '/api/user/resetpw') {
@@ -38,21 +35,12 @@ const verifyJWT = (req, res, next) => {
   }
   try {
     decoded = jwt.verify(token, secret);
-    console.log('====================================');
-    console.log('successfully decoded', decoded);
-    console.log('====================================');
   } catch (err) {
     decoded = jwt.decode(token);
-    console.log('====================================');
-    console.log('middleware: ', decoded);
-    console.log('====================================');
     req.decoded = decoded.id;
     next(err);
   }
   if (source === 'reset' || source === 'email') {
-    console.log('====================================');
-    console.log('email', decoded.id);
-    console.log('====================================');
     req.emailId = decoded.id;
     next();
   }
@@ -73,15 +61,9 @@ const verifyJWT = (req, res, next) => {
 
 const handleEmailTokenError = (err, req, res, next) => {
   if (err) {
-    console.log('====================================');
-    console.log('erring', err);
-    console.log('====================================');
     databaseServices.removeEmailToken(req.decoded);
     next(err);
   }
-  console.log('====================================');
-  console.log('no err move along');
-  console.log('====================================');
   next();
 };
 
