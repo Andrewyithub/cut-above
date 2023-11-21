@@ -63,7 +63,7 @@ const handlePasswordReset = async (req, res) => {
   const emailSent = await email.sendEmail({
     receiver: user.email,
     option: 'reset password',
-    emailLink: `${config.CLIENT_URL}/resetpw/?token=${emailToken}`,
+    emailLink: `${config.CLIENT_URL}/resetpw/?token=${resetEmailToken}`,
   });
   res.status(200).json({
     success: true,
