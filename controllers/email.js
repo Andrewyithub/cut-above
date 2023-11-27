@@ -72,9 +72,35 @@ const handlePasswordReset = async (req, res) => {
   });
 };
 
+const handleMessageReceived = async (req, res) => {
+  const { submitter, message } = req.body;
+  const messageRecordKeeping = await email.sendEmail({
+    receiver: config.EMAIL_USER,
+    option: 'message submission',
+    submitter,
+    message,
+  });
+  console.log('====================================');
+  console.log('message record keeping response: ', messageRecordKeeping);
+  console.log('====================================');
+  const messageAutoResponse = await email.sendEmail({
+    receiver: submitter,
+    option: 'message auto reply',
+  });
+  console.log('====================================');
+  console.log('message auto response: ', messageAutoResponse);
+  console.log('====================================');
+  res.status(200).json({
+    success: true,
+    message:
+      'Message has been received. You can expect a response in a timely manner.',
+  });
+};
+
 module.exports = {
   handleConfirmation,
   handleModification,
   handleCancellation,
   handlePasswordReset,
+  handleMessageReceived,
 };

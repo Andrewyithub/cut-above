@@ -7,7 +7,15 @@ const generateEmailId = () => {
   return uuidv4();
 };
 
-const options = (employee, date, time, option, emailLink) => {
+const options = (
+  employee,
+  date,
+  time,
+  option,
+  emailLink,
+  submitter,
+  message
+) => {
   const templates = {
     confirmation: {
       subject: `Your booking at Cut Above Barbershop:`, // Subject line
@@ -26,6 +34,16 @@ const options = (employee, date, time, option, emailLink) => {
       subject: 'Instructions to reset your password.',
       text: `Follow this link to change your password: ${emailLink}. Once clicked this link will be immediately disabled. You also only have one hour before this link becomes inactive.`,
     },
+    'message submission': {
+      subject: 'A new message has been submitted.',
+      text: `You have received a new message from ${submitter}: 
+      
+      ${message}`,
+    },
+    'message auto reply': {
+      subject: 'Your message has been received.',
+      text: 'Your message has been received. You will get a reply to your message in a timely manner. Please do not reply to this email.',
+    },
   };
 
   if (option in templates) {
@@ -42,6 +60,8 @@ const sendEmail = async ({
   time,
   option,
   emailLink,
+  submitter,
+  message,
 }) => {
   const transporter = nodemailer.createTransport({
     service: config.EMAIL_SERVICE,
@@ -56,7 +76,15 @@ const sendEmail = async ({
     to: receiver,
   };
 
-  const emailTemplate = options(employee, date, time, option, emailLink);
+  const emailTemplate = options(
+    employee,
+    date,
+    time,
+    option,
+    emailLink,
+    submitter,
+    message
+  );
   const fullEmailOptions = { ...senderReceiverOptions, ...emailTemplate };
   // Send Email
   try {
