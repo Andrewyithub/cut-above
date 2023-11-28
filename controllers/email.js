@@ -73,23 +73,17 @@ const handlePasswordReset = async (req, res) => {
 };
 
 const handleMessageReceived = async (req, res) => {
-  const { submitter, message } = req.body;
+  console.log(req.body);
+  const { contactDetails } = req.body;
   const messageRecordKeeping = await email.sendEmail({
     receiver: config.EMAIL_USER,
     option: 'message submission',
-    submitter,
-    message,
+    contactDetails,
   });
-  console.log('====================================');
-  console.log('message record keeping response: ', messageRecordKeeping);
-  console.log('====================================');
   const messageAutoResponse = await email.sendEmail({
-    receiver: submitter,
+    receiver: contactDetails.email,
     option: 'message auto reply',
   });
-  console.log('====================================');
-  console.log('message auto response: ', messageAutoResponse);
-  console.log('====================================');
   res.status(200).json({
     success: true,
     message:

@@ -13,8 +13,7 @@ const options = (
   time,
   option,
   emailLink,
-  submitter,
-  message
+  contactDetails = {}
 ) => {
   const templates = {
     confirmation: {
@@ -34,15 +33,17 @@ const options = (
       subject: 'Instructions to reset your password.',
       text: `Follow this link to change your password: ${emailLink}. Once clicked this link will be immediately disabled. You also only have one hour before this link becomes inactive.`,
     },
-    'message submission': {
-      subject: 'A new message has been submitted.',
-      text: `You have received a new message from ${submitter}: 
-      
-      ${message}`,
-    },
     'message auto reply': {
       subject: 'Your message has been received.',
       text: 'Your message has been received. You will get a reply to your message in a timely manner. Please do not reply to this email.',
+    },
+    'message submission': {
+      subject: 'A new message has been submitted.',
+      text: `You have received a new message from ${contactDetails.email}:
+
+      first name: ${contactDetails.firstName}
+      last name: ${contactDetails.lastName}
+      message: ${contactDetails.message}`,
     },
   };
 
@@ -60,8 +61,7 @@ const sendEmail = async ({
   time,
   option,
   emailLink,
-  submitter,
-  message,
+  contactDetails,
 }) => {
   const transporter = nodemailer.createTransport({
     service: config.EMAIL_SERVICE,
@@ -82,10 +82,11 @@ const sendEmail = async ({
     time,
     option,
     emailLink,
-    submitter,
-    message
+    contactDetails
   );
+
   const fullEmailOptions = { ...senderReceiverOptions, ...emailTemplate };
+
   // Send Email
   try {
     const info = await transporter.sendMail(fullEmailOptions);
