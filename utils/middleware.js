@@ -5,7 +5,7 @@ const databaseServices = require('./database');
 
 const requestLogger = (req, res, next) => {
   // prevents logging of user information
-  if (req.path !== '/auth') {
+  if (req.path !== '/auth' || req.path !== '/signup') {
     logger.info('Method:', req.method);
     logger.info('Path:  ', req.path);
     logger.info('Body:  ', req.body);
