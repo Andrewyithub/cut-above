@@ -179,12 +179,12 @@ const modifyAppointment = async (req, res) => {
   if (!client) {
     throw new AppError(500, 'Something went wrong');
   }
+
   // create expiration
   // Calculate new token expiration date
-  const appointmentDateTime = dayjs(formattedData.date);
-
-  const expirationDateTime = appointmentDateTime.subtract(2, 'day');
-  const expiresInSec = expirationDateTime.diff(dayjs(), 'second');
+  const expiresInSec = date.dateServices.generateExpirationInSecs(
+    formattedData.date
+  );
 
   // Creating user email token
   const newEmailId = emailServices.generateEmailId();
@@ -254,7 +254,6 @@ module.exports = {
   getOneAppointment,
   bookAppointment,
   modifyAppointment,
-  // createNewAppointment,
   updateAppointmentStatus,
   cancelAppointment,
 };

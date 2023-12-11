@@ -68,11 +68,20 @@ const generateRange = (dates, open, close) => {
   return datesToSchedule;
 };
 
+// generates expiration for jwt token 2 days before appointment
+const generateExpirationInSecs = (date) => {
+  const appointmentDateTime = dayjs(date);
+  const expirationDateTime = appointmentDateTime.subtract(2, 'day');
+  const expiresInSec = expirationDateTime.diff(dayjs(), 'second');
+  return expiresInSec;
+};
+
 module.exports = {
   checkAvailability,
   easternDate,
   easternDateTime,
   formatDateSlash,
   formatTime,
+  generateExpirationInSecs,
   generateRange,
 };
