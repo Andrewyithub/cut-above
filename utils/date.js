@@ -30,6 +30,8 @@ const checkAvailability = (schedule, newAppt) => {
   return true;
 };
 
+// takes a date in '2023-12-24' format and time in '10:00' format and converts it into dayjs obj with correct time zone conversion
+// database util uses this
 const easternDateTime = (inputDate, inputTime) => {
   const dateObj = dayjs.tz(inputDate, 'America/New_York');
   const [hour, minute] = inputTime.split(':');
@@ -37,6 +39,7 @@ const easternDateTime = (inputDate, inputTime) => {
 };
 
 // takes eastern standard date and converts it into utc time ex. 00:00 => 04:00
+// database util uses this to convert date
 const easternDate = (inputDate) => {
   return dayjs.tz(inputDate, 'America/New_York');
 };

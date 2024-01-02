@@ -61,12 +61,10 @@ const bookAppointment = async (req, res) => {
   schedule.appointments.push(newAppt);
   await schedule.save({ session });
 
-  // ! 4: Creating user email token
-  const appointmentDateTime = dayjs(formattedData.date);
-
-  // ! 5: Calculate expiration date
-  const expirationDateTime = appointmentDateTime.subtract(2, 'day');
-  const expiresInSec = expirationDateTime.diff(dayjs(), 'second');
+  // ! 4: Generate jwt token
+  const expiresInSec = dateServices.generateExpirationInSecs(
+    formattedData.date
+  );
 
   const emailId = emailServices.generateEmailId();
   const userEmailToken = jwt.sign(
@@ -79,7 +77,7 @@ const bookAppointment = async (req, res) => {
   client.emailToken.push(emailId);
   await client.save({ session });
 
-  // ! 6: Sending confirmation
+  // ! 5: Sending confirmation
   const emailSent = await emailServices.sendEmail({
     receiver: client.email,
     employee: employeeToBook.firstName,
