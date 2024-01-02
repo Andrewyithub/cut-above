@@ -17,7 +17,6 @@ const requestLogger = (req, res, next) => {
 const verifyJWT = (req, res, next) => {
   const authHeader = req.headers.authorization || req.headers.Authorization;
   if (!authHeader?.startsWith('Bearer ') && !req.body.emailToken) {
-    // return res.sendStatus(401);
     throw new AppError(401, 'Unauthorized');
   }
   const token = authHeader ? authHeader.split(' ')[1] : req.body.emailToken;
@@ -37,6 +36,7 @@ const verifyJWT = (req, res, next) => {
     decoded = jwt.verify(token, secret);
   } catch (err) {
     decoded = jwt.decode(token);
+    // decoded sent to handleEmailTokenError
     req.decoded = decoded.id;
     next(err);
   }
@@ -48,15 +48,6 @@ const verifyJWT = (req, res, next) => {
     req.user = decoded.id;
     next();
   }
-  // jwt.verify(token, secret, (err, decoded) => {
-  //   if (err) {
-  //     // return res.sendStatus(403); //invalid token
-  //     next(err);
-  //   }
-  //   // reset and email decodes into user's emailToken
-  //   req.user = decoded.id;
-  //   next();
-  // });
 };
 
 const handleEmailTokenError = (err, req, res, next) => {
