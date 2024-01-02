@@ -182,7 +182,7 @@ const modifyAppointment = async (req, res) => {
 
   // create expiration
   // Calculate new token expiration date
-  const expiresInSec = date.dateServices.generateExpirationInSecs(
+  const expiresInSec = dateServices.generateExpirationInSecs(
     formattedData.date
   );
 
