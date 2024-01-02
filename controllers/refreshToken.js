@@ -1,13 +1,14 @@
-const jwt = require("jsonwebtoken");
-const User = require("../models/User");
-const AppError = require("../utils/AppError");
+const jwt = require('jsonwebtoken');
+const User = require('../models/User');
+const AppError = require('../utils/AppError');
+const jwtServices = require('../utils/jwt');
 
 const handleRefreshToken = async (req, res) => {
   const cookies = req.cookies;
   // if (!cookies?.jwt) return res.sendStatus(401);
-  if (!cookies?.jwt) throw new AppError(401, "Unauthorized");
+  if (!cookies?.jwt) throw new AppError(401, 'Unauthorized');
   const refreshToken = cookies.jwt;
-  res.clearCookie("jwt", { httpOnly: true, sameSite: "None", secure: true });
+  res.clearCookie('jwt', { httpOnly: true, sameSite: 'None', secure: true });
 
   const foundUser = await User.findOne({ refreshToken }).exec();
 
@@ -19,7 +20,7 @@ const handleRefreshToken = async (req, res) => {
       process.env.REFRESH_TOKEN_SECRET,
       async (err, decoded) => {
         // if (err) return res.sendStatus(403); //Forbidden
-        if (err) throw new AppError(403, "Forbidden"); //Forbidden
+        if (err) throw new AppError(403, 'Forbidden'); //Forbidden
         // Delete refresh tokens of hacked user
         const hackedUser = await User.findOne({
           _id: decoded._id,
@@ -29,7 +30,7 @@ const handleRefreshToken = async (req, res) => {
       }
     );
     // return res.sendStatus(403); //Forbidden
-    throw new AppError(403, "Forbidden"); //Forbidden
+    throw new AppError(403, 'Forbidden'); //Forbidden
   }
 
   const newRefreshTokenArray = foundUser.refreshToken.filter(
@@ -48,31 +49,20 @@ const handleRefreshToken = async (req, res) => {
       }
       if (err || foundUser._id.toString() !== decoded.id)
         // return res.sendStatus(403);
-        throw new AppError(403, "Forbidden");
+        throw new AppError(403, 'Forbidden');
 
       // Refresh token was still valid
-      const accessToken = jwt.sign(
-        {
-          id: foundUser._id,
-        },
-        process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: "1h" }
-      );
-
-      const newRefreshToken = jwt.sign(
-        { id: foundUser._id },
-        process.env.REFRESH_TOKEN_SECRET,
-        { expiresIn: "1d" }
-      );
+      const accessToken = jwtServices.createAccessToken(foundUser._id);
+      const newRefreshToken = jwtServices.createRefreshToken(foundUser._id);
       // Saving refreshToken with current user
       foundUser.refreshToken = [...newRefreshTokenArray, newRefreshToken];
       await foundUser.save();
 
       // Creates Secure Cookie with refresh token
-      res.cookie("jwt", newRefreshToken, {
+      res.cookie('jwt', newRefreshToken, {
         httpOnly: true,
         secure: true,
-        sameSite: "None",
+        sameSite: 'None',
         maxAge: 1 * 60 * 60 * 1000, // 1 day
       });
       res.json({ token: accessToken });
