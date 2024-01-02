@@ -8,8 +8,7 @@ const emailServices = require('../utils/email');
 const AppError = require('../utils/AppError');
 const config = require('../config/config');
 
-const jwt = require('jsonwebtoken');
-const dayjs = require('dayjs');
+const jwtServices = require('../utils/email');
 
 const getAllAppointments = async (req, res) => {
   const appointments = await Appointment.find({
@@ -67,13 +66,7 @@ const bookAppointment = async (req, res) => {
   );
 
   const emailId = emailServices.generateEmailId();
-  const userEmailToken = jwt.sign(
-    {
-      id: emailId,
-    },
-    process.env.EMAIL_TOKEN_SECRET,
-    { expiresIn: expiresInSec }
-  );
+  const userEmailToken = jwtServices.createEmailToken(emailId, expiresInSec);
   client.emailToken.push(emailId);
   await client.save({ session });
 
@@ -186,13 +179,8 @@ const modifyAppointment = async (req, res) => {
 
   // Creating user email token
   const newEmailId = emailServices.generateEmailId();
-  const userEmailToken = jwt.sign(
-    {
-      id: newEmailId,
-    },
-    process.env.EMAIL_TOKEN_SECRET,
-    { expiresIn: expiresInSec }
-  );
+  const userEmailToken = jwtServices.createEmailToken(newEmailId, expiresInSec);
+
   client.emailToken.push(newEmailId);
   await client.save({ session });
 

@@ -1,7 +1,8 @@
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const AppError = require('../utils/AppError');
+
+const jwtServices = require('../utils/jwt');
 
 const handleLogin = async (req, res) => {
   const cookies = req.cookies;
@@ -20,21 +21,8 @@ const handleLogin = async (req, res) => {
   if (!match) {
     throw new AppError(401, 'Unauthorized');
   }
-  const accessToken = jwt.sign(
-    {
-      id: foundUser._id,
-    },
-    process.env.ACCESS_TOKEN_SECRET,
-    { expiresIn: '1h' }
-  );
-  const newRefreshToken = jwt.sign(
-    {
-      id: foundUser._id,
-    },
-    process.env.REFRESH_TOKEN_SECRET,
-    { expiresIn: '1d' }
-  );
-
+  const accessToken = jwtServices.createAccessToken(foundUser._id);
+  const newRefreshToken = jwtServices.createRefreshToken(foundUser._id);
   let newRefreshTokenArray = !cookies?.jwt
     ? foundUser.refreshToken
     : foundUser.refreshToken.filter((rt) => rt !== cookies.jwt);
