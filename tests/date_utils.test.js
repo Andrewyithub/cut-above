@@ -1,5 +1,4 @@
 const { formatData } = require('../utils/database');
-const { easternDate } = require('../utils/date');
 
 test('test database util which formats dates to be saved', async () => {
   const date = '2023-12-24';
