@@ -1,5 +1,9 @@
 require('dotenv').config();
 
+const MONGODB_URI =
+  process.env.NODE_ENV === 'test'
+    ? process.env.TEST_MONGODB_URI
+    : process.env.MONGODB_URI;
 const CLIENT_URL =
   process.env.NODE_ENV === 'development'
     ? process.env.DEV_CLIENT_URL
@@ -22,6 +26,7 @@ const PORT =
     : process.env.PORT;
 
 module.exports = {
+  MONGODB_URI,
   CLIENT_URL,
   EMAIL_SERVICE,
   EMAIL_USER,

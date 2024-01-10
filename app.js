@@ -10,10 +10,11 @@ const corsOptions = require('./config/corsOptions');
 const logger = require('./utils/logger');
 const middleware = require('./utils/middleware');
 const { defineRoutes } = require('./routes/');
+const config = require('./config/config');
 
 mongoose.set('strictQuery', false);
 mongoose
-  .connect(process.env.MONGODB_URI)
+  .connect(config.MONGODB_URI)
   .then(() => {
     logger.info('connected to MongoDB');
   })
