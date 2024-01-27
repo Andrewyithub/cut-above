@@ -66,3 +66,27 @@ test('modifying an appointment through services', async () => {
     new Date(helper.schedules[1].date).toISOString()
   );
 });
+
+describe('updating an appointment status', () => {
+  test('through services', async () => {
+    const Appointment = require('../models/Appointment');
+    jest.mock('../models/Appointment');
+    const {
+      updateAppointmentStatus,
+    } = require('../services/appointmentServices');
+
+    await Appointment.updateOne.mockResolvedValueOnce({
+      id: 'abc123',
+      status: 'completed',
+    });
+    const updatedAppointment = await updateAppointmentStatus({
+      id: 'abc123',
+      status: 'completed',
+    });
+
+    expect(updatedAppointment).toEqual({
+      id: 'abc123',
+      status: 'completed',
+    });
+  });
+});

@@ -3,6 +3,7 @@ const {
   getOne,
   create,
   modify,
+  updateStatus,
 } = require('../repositories/appointmentRepository');
 const {
   addAppointment,
@@ -83,6 +84,10 @@ const modifyAppointment = async (apptData) => {
   // send email
 };
 
+const updateAppointmentStatus = async (apptData) => {
+  return await updateStatus(apptData);
+};
+
 module.exports = {
   formatApptData,
   getAllAppointments,
@@ -90,4 +95,5 @@ module.exports = {
   isAvailableAppointment,
   bookAppointment,
   modifyAppointment,
+  updateAppointmentStatus,
 };

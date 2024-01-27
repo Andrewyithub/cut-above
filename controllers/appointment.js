@@ -50,6 +50,18 @@ const modifyAppointment = async (req, res) => {
   });
 };
 
+const updateAppointmentStatus = async (req, res) => {
+  await appointmentServices.updateAppointmentStatus({
+    id: req.params.id,
+    status: req.body.status,
+  });
+  res.status(200).json({
+    success: true,
+    message: 'Appointment successfully updated',
+    data: updatedAppointment,
+  });
+};
+
 // const bookAppointment = async (req, res) => {
 //   // const session = await mongoose.startSession();
 //   // session.startTransaction();
@@ -226,17 +238,17 @@ const modifyAppointment = async (req, res) => {
 //   session.endSession();
 // };
 
-const updateAppointmentStatus = async (req, res) => {
-  const updatedAppointment = await Appointment.updateOne(
-    { _id: req.params.id },
-    { $set: { status: req.body.status } }
-  );
-  res.status(200).json({
-    success: true,
-    message: 'Appointment successfully updated',
-    data: updatedAppointment,
-  });
-};
+// const updateAppointmentStatus = async (req, res) => {
+//   const updatedAppointment = await Appointment.updateOne(
+//     { _id: req.params.id },
+//     { $set: { status: req.body.status } }
+//   );
+//   res.status(200).json({
+//     success: true,
+//     message: 'Appointment successfully updated',
+//     data: updatedAppointment,
+//   });
+// };
 
 const cancelAppointment = async (req, res) => {
   if (req.emailId) {
