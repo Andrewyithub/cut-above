@@ -1,6 +1,6 @@
 # Cut Above Barbershop
 
-Server side code for Cut Above. Currently not being maintained. Application has been to this [repo](https://github.com/Andrewy-gh/cut-above-sql)
+Server side code for Cut Above. Currently not being maintained. Application has been moved to this [repo](https://github.com/Andrewy-gh/cut-above-sql)
 
 **Link to project:** https://cutabove.fly.dev
 
